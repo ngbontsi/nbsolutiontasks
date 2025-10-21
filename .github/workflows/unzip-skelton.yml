@@ -1,0 +1,25 @@
+# __define-ocg__ Unzip workflow for your task manager skeleton
+name: Unzip Task Manager Skeleton
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub Actions
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Unzip skeleton
+        run: |
+          varOcg="task-manager-skeleton-v2-kafka.zip"
+          unzip "$varOcg" -d ./skeleton
+          rm "$varOcg"
+
+      - name: Commit unzipped files
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          git commit -m "Unzipped project skeleton"
+          git push
