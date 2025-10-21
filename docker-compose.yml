@@ -1,4 +1,3 @@
-
 version: "3.9"
 services:
   postgres:
@@ -56,6 +55,16 @@ services:
       - postgres
       - redis
       - kafka
+    networks:
+      - tasknet
+
+  frontend:
+    build: ./frontend
+    container_name: task_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
     networks:
       - tasknet
 
