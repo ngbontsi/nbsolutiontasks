@@ -1,0 +1,39 @@
+# __define-ocg__ Build workflow for backend service
+name: Backend Build
+
+on:
+  workflow_dispatch: # Manual run from Actions tab
+  push:
+    paths:
+      - 'backend/**'  # Only trigger when backend changes
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Build backend
+        working-directory: backend
+        run: |
+          varOcg=$(pwd)
+          echo "Building from $varOcg"
+          mvn clean package -DskipTests
+
+      - name: Archive JAR file
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
