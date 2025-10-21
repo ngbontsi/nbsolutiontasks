@@ -18,8 +18,8 @@ jobs:
 
       - name: Commit unzipped files
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
+          git config user.name "ngbontsi"
+          git config user.email "ngbontsi@github.com"
           git add .
           git commit -m "Unzipped project skeleton"
           git push
