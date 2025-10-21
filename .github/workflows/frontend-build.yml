@@ -5,7 +5,7 @@ on:
   workflow_dispatch:       # manual trigger
   push:
     paths:
-      - 'Frontend/**'     # only run when frontend files change
+      - 'frontend/**'     # only run when frontend files change
 
 permissions:
   contents: read
@@ -24,15 +24,15 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        working-directory: Frontend
+        working-directory: frontend
         run: npm ci
 
       - name: Build frontend
-        working-directory: Frontend
+        working-directory: frontend
         run: npm run build
 
       - name: Upload frontend build
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
-          path: Frontend/dist
+          path: frontend/dist
