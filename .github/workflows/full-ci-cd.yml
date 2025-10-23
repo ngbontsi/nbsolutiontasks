@@ -29,7 +29,7 @@ jobs:
 
       # 3️⃣ Backend: Build with Maven
       - name: Build Backend
-        working-directory: Backend
+        working-directory: backend
         run: mvn clean package -DskipTests
 
       # 4️⃣ Setup Node.js for frontend
@@ -40,11 +40,11 @@ jobs:
 
       # 5️⃣ Frontend: Install & Build
       - name: Install Frontend Dependencies
-        working-directory: Frontend
+        working-directory: frontend
         run: npm ci
 
       - name: Build Frontend
-        working-directory: Frontend
+        working-directory: frontend
         run: npm run build
 
       # 6️⃣ Login to GHCR
