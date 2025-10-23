@@ -1,0 +1,72 @@
+# __define-ocg__ Full CI/CD: Backend + Frontend Docker Build + GHCR Push
+name: Full CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # allows manual trigger
+
+permissions:
+  contents: read
+  packages: write # needed for GHCR push
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repo
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup JDK 17 for backend
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: temurin
+
+      # 3️⃣ Backend: Build with Maven
+      - name: Build Backend
+        working-directory: Backend
+        run: mvn clean package -DskipTests
+
+      # 4️⃣ Setup Node.js for frontend
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # 5️⃣ Frontend: Install & Build
+      - name: Install Frontend Dependencies
+        working-directory: Frontend
+        run: npm ci
+
+      - name: Build Frontend
+        working-directory: Frontend
+        run: npm run build
+
+      # 6️⃣ Login to GHCR
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 7️⃣ Build Backend Docker Image
+      - name: Build Backend Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/backend:latest ./Backend
+
+      # 8️⃣ Build Frontend Docker Image
+      - name: Build Frontend Docker Image
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/frontend:latest ./Frontend
+
+      # 9️⃣ Push Docker Images to GHCR
+      - name: Push Docker Images
+        run: |
+          docker push ghcr.io/${{ github.repository }}/backend:latest
+          docker push ghcr.io/${{ github.repository }}/frontend:latest
