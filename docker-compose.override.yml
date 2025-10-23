@@ -1,0 +1,24 @@
+# __define-ocg__ docker-compose override to pull GHCR images
+version: "3.9"
+services:
+  backend:
+    image: ghcr.io/ngbontsi/nbsolutiontasks/backend:latest
+    container_name: task_backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - redis
+      - kafka
+    networks:
+      - tasknet
+
+  frontend:
+    image: ghcr.io/ngbontsi/nbsolutiontasks/frontend:latest
+    container_name: task_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - tasknet
