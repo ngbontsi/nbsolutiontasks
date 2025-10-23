@@ -58,12 +58,12 @@ jobs:
       # 7️⃣ Build Backend Docker Image
       - name: Build Backend Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/backend:latest ./Backend
+          docker build -t ghcr.io/${{ github.repository }}/backend:latest ./backend
 
       # 8️⃣ Build Frontend Docker Image
       - name: Build Frontend Docker Image
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/frontend:latest ./Frontend
+          docker build -t ghcr.io/${{ github.repository }}/frontend:latest ./frontend
 
       # 9️⃣ Push Docker Images to GHCR
       - name: Push Docker Images
