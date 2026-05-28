@@ -1,6 +1,7 @@
 package com.platform.restaurant.service;
 
 import com.platform.restaurant.dto.RestaurantRequest;
+import com.platform.restaurant.exception.ResourceNotFoundException;
 import com.platform.restaurant.model.Restaurant;
 import com.platform.restaurant.repository.RestaurantRepository;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class RestaurantService {
 
     public Restaurant getById(String id) {
         return restaurantRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Restaurant not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
     }
 
     public Restaurant update(String id, RestaurantRequest request) {

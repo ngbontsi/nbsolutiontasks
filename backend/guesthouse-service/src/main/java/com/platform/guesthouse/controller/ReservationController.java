@@ -3,6 +3,7 @@ package com.platform.guesthouse.controller;
 import com.platform.guesthouse.dto.ReservationRequest;
 import com.platform.guesthouse.model.Reservation;
 import com.platform.guesthouse.service.ReservationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @PostMapping
-    public ResponseEntity<Reservation> create(@RequestBody ReservationRequest request) {
+    public ResponseEntity<Reservation> create(@Valid @RequestBody ReservationRequest request) {
         return ResponseEntity.ok(reservationService.create(request));
     }
 

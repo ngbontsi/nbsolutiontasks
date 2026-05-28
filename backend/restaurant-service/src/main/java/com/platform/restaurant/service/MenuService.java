@@ -1,6 +1,7 @@
 package com.platform.restaurant.service;
 
 import com.platform.restaurant.dto.MenuItemRequest;
+import com.platform.restaurant.exception.ResourceNotFoundException;
 import com.platform.restaurant.model.MenuItem;
 import com.platform.restaurant.repository.MenuItemRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +33,7 @@ public class MenuService {
 
     public MenuItem getById(String id) {
         return menuItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Menu item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
     }
 
     public MenuItem update(String id, MenuItemRequest request) {

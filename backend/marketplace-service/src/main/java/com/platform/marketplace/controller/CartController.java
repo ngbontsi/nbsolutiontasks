@@ -3,6 +3,7 @@ package com.platform.marketplace.controller;
 import com.platform.marketplace.dto.CartItemRequest;
 import com.platform.marketplace.dto.CartResponse;
 import com.platform.marketplace.service.CartService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class CartController {
     }
 
     @PostMapping
-    public ResponseEntity<CartResponse> addToCart(@RequestBody CartItemRequest request) {
+    public ResponseEntity<CartResponse> addToCart(@Valid @RequestBody CartItemRequest request) {
         return ResponseEntity.ok(cartService.addToCart(request));
     }
 

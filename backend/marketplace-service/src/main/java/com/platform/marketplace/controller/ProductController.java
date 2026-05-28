@@ -3,6 +3,7 @@ package com.platform.marketplace.controller;
 import com.platform.marketplace.dto.ProductRequest;
 import com.platform.marketplace.model.Product;
 import com.platform.marketplace.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<Product> create(@RequestBody ProductRequest request) {
+    public ResponseEntity<Product> create(@Valid @RequestBody ProductRequest request) {
         return ResponseEntity.ok(productService.create(request));
     }
 
@@ -47,7 +48,7 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@PathVariable String id, @RequestBody ProductRequest request) {
+    public ResponseEntity<Product> update(@PathVariable String id, @Valid @RequestBody ProductRequest request) {
         return ResponseEntity.ok(productService.update(id, request));
     }
 

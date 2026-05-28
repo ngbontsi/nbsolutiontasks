@@ -1,6 +1,7 @@
 package com.platform.marketplace.service;
 
 import com.platform.marketplace.dto.ProductRequest;
+import com.platform.marketplace.exception.ResourceNotFoundException;
 import com.platform.marketplace.model.Product;
 import com.platform.marketplace.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -46,7 +47,7 @@ public class ProductService {
 
     public Product getById(String id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
     }
 
     public Product update(String id, ProductRequest request) {

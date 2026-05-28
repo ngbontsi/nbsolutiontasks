@@ -1,6 +1,7 @@
 package com.platform.guesthouse.service;
 
 import com.platform.guesthouse.dto.RoomRequest;
+import com.platform.guesthouse.exception.ResourceNotFoundException;
 import com.platform.guesthouse.model.Room;
 import com.platform.guesthouse.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class RoomService {
 
     public Room getById(String id) {
         return roomRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Room not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
     }
 
     public Room update(String id, RoomRequest request) {

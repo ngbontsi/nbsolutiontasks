@@ -21,6 +21,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tasks")
 @Tag(name = "Task", description = "Task management endpoints")
+
 public class TaskController {
 
     private final TaskService taskService;
@@ -36,9 +37,9 @@ public class TaskController {
                     content = @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = TaskResponse.class))))
     })
-    public List<TaskResponse> getAllTasks(
+    public ResponseEntity<List<TaskResponse>> getAllTasks(
             @RequestHeader(value = "X-User-Id", required = false) String userId) {
-        return taskService.getAllTasks(userId);
+        return ResponseEntity.ok( taskService.getAllTasks(userId));
     }
 
     @GetMapping("/{id}")

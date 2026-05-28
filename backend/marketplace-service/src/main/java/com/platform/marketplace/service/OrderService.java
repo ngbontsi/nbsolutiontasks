@@ -1,6 +1,7 @@
 package com.platform.marketplace.service;
 
 import com.platform.marketplace.dto.OrderRequest;
+import com.platform.marketplace.exception.ResourceNotFoundException;
 import com.platform.marketplace.model.*;
 import com.platform.marketplace.repository.CartItemRepository;
 import com.platform.marketplace.repository.CartRepository;
@@ -27,7 +28,7 @@ public class OrderService {
     @Transactional
     public Order createOrder(OrderRequest request) {
         Cart cart = cartRepository.findByUserId(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
         
@@ -80,7 +81,7 @@ public class OrderService {
 
     public Order getById(String id) {
         return orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
     }
 
     public List<OrderItem> getOrderItems(String orderId) {

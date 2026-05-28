@@ -3,6 +3,7 @@ package com.platform.guesthouse.controller;
 import com.platform.guesthouse.dto.GuesthouseRequest;
 import com.platform.guesthouse.model.Guesthouse;
 import com.platform.guesthouse.service.GuesthouseService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class GuesthouseController {
     private final GuesthouseService guesthouseService;
 
     @PostMapping
-    public ResponseEntity<Guesthouse> create(@RequestBody GuesthouseRequest request) {
+    public ResponseEntity<Guesthouse> create(@Valid @RequestBody GuesthouseRequest request) {
         return ResponseEntity.ok(guesthouseService.create(request));
     }
 
@@ -37,7 +38,7 @@ public class GuesthouseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Guesthouse> update(@PathVariable String id, @RequestBody GuesthouseRequest request) {
+    public ResponseEntity<Guesthouse> update(@PathVariable String id, @Valid @RequestBody GuesthouseRequest request) {
         return ResponseEntity.ok(guesthouseService.update(id, request));
     }
 

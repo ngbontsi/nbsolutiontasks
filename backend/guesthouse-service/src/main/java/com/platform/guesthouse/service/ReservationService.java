@@ -1,6 +1,7 @@
 package com.platform.guesthouse.service;
 
 import com.platform.guesthouse.dto.ReservationRequest;
+import com.platform.guesthouse.exception.ResourceNotFoundException;
 import com.platform.guesthouse.model.Reservation;
 import com.platform.guesthouse.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,6 @@ public class ReservationService {
 
     public Reservation getById(String id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Reservation not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
     }
 }

@@ -3,6 +3,14 @@ package com.platform.restaurant.controller;
 import com.platform.restaurant.dto.MenuItemRequest;
 import com.platform.restaurant.model.MenuItem;
 import com.platform.restaurant.service.MenuService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,31 +20,69 @@ import java.util.List;
 @RestController
 @RequestMapping("/menu")
 @RequiredArgsConstructor
+@Tag(name ="Menu", description ="The menu endponts")
 public class MenuController {
 
     private final MenuService menuService;
 
     @PostMapping
-    public ResponseEntity<MenuItem> create(@RequestBody MenuItemRequest request) {
+    @Operation(summary = "Create a new menu", description = "Creates a new menu with the provided details")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Menu created successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MenuItem.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = @Content)
+    })
+    public ResponseEntity<MenuItem> create(@Valid @RequestBody MenuItemRequest request) {
         return ResponseEntity.ok(menuService.create(request));
     }
 
     @GetMapping("/restaurant/{restaurantId}")
+    @Operation(summary = "Get all menus", description = "Retrieves a list of all menus by resturantId")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Successfully retrieved menus",
+                    content = @Content(mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = MenuItem.class))))
+    })
     public ResponseEntity<List<MenuItem>> getByRestaurant(@PathVariable String restaurantId) {
         return ResponseEntity.ok(menuService.getByRestaurant(restaurantId));
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Get menu by ID", description = "Retrieves a single menu by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Menu found",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MenuItem.class))),
+            @ApiResponse(responseCode = "404", description = "Menu not found",
+                    content = @Content)
+    })
     public ResponseEntity<MenuItem> getById(@PathVariable String id) {
         return ResponseEntity.ok(menuService.getById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MenuItem> update(@PathVariable String id, @RequestBody MenuItemRequest request) {
+    @Operation(summary = "Update a Menu", description = "Updates an existing menu by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Menu updated successfully",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = MenuItem.class))),
+            @ApiResponse(responseCode = "404", description = "Menu not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "400", description = "Invalid input",
+                    content = @Content)
+    })
+    public ResponseEntity<MenuItem> update(@PathVariable String id, @Valid @RequestBody MenuItemRequest request) {
         return ResponseEntity.ok(menuService.update(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a menu", description = "Deletes a menu by its ID")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Menu deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Menu not found")
+    })
     public ResponseEntity<Void> delete(@PathVariable String id) {
         menuService.delete(id);
         return ResponseEntity.noContent().build();

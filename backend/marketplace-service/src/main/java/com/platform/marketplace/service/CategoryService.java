@@ -1,6 +1,7 @@
 package com.platform.marketplace.service;
 
 import com.platform.marketplace.dto.CategoryRequest;
+import com.platform.marketplace.exception.ResourceNotFoundException;
 import com.platform.marketplace.model.Category;
 import com.platform.marketplace.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +34,7 @@ public class CategoryService {
 
     public Category getById(String id) {
         return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
     }
 
     public Category update(String id, CategoryRequest request) {

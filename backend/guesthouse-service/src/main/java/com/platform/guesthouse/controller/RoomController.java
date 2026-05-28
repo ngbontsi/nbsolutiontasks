@@ -3,6 +3,7 @@ package com.platform.guesthouse.controller;
 import com.platform.guesthouse.dto.RoomRequest;
 import com.platform.guesthouse.model.Room;
 import com.platform.guesthouse.service.RoomService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class RoomController {
     private final RoomService roomService;
 
     @PostMapping
-    public ResponseEntity<Room> create(@RequestBody RoomRequest request) {
+    public ResponseEntity<Room> create(@Valid @RequestBody RoomRequest request) {
         return ResponseEntity.ok(roomService.create(request));
     }
 
@@ -32,7 +33,7 @@ public class RoomController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Room> update(@PathVariable String id, @RequestBody RoomRequest request) {
+    public ResponseEntity<Room> update(@PathVariable String id, @Valid @RequestBody RoomRequest request) {
         return ResponseEntity.ok(roomService.update(id, request));
     }
 

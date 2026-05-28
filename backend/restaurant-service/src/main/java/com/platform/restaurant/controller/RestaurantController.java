@@ -3,6 +3,7 @@ package com.platform.restaurant.controller;
 import com.platform.restaurant.dto.RestaurantRequest;
 import com.platform.restaurant.model.Restaurant;
 import com.platform.restaurant.service.RestaurantService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class RestaurantController {
     private final RestaurantService restaurantService;
 
     @PostMapping
-    public ResponseEntity<Restaurant> create(@RequestBody RestaurantRequest request) {
+    public ResponseEntity<Restaurant> create(@Valid @RequestBody RestaurantRequest request) {
         return ResponseEntity.ok(restaurantService.create(request));
     }
 
@@ -37,7 +38,7 @@ public class RestaurantController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Restaurant> update(@PathVariable String id, @RequestBody RestaurantRequest request) {
+    public ResponseEntity<Restaurant> update(@PathVariable String id, @Valid @RequestBody RestaurantRequest request) {
         return ResponseEntity.ok(restaurantService.update(id, request));
     }
 

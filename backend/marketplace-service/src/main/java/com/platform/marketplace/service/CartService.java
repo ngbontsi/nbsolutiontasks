@@ -3,6 +3,7 @@ package com.platform.marketplace.service;
 import com.platform.marketplace.dto.CartItemDetail;
 import com.platform.marketplace.dto.CartItemRequest;
 import com.platform.marketplace.dto.CartResponse;
+import com.platform.marketplace.exception.ResourceNotFoundException;
 import com.platform.marketplace.model.Cart;
 import com.platform.marketplace.model.CartItem;
 import com.platform.marketplace.model.Product;
@@ -80,7 +81,7 @@ public class CartService {
         
         CartItem item = cartItemRepository
                 .findByCartIdAndProductId(cart.getId(), productId)
-                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
 
         if (quantity <= 0) {
             cartItemRepository.delete(item);
@@ -94,7 +95,7 @@ public class CartService {
 
     public void clearCart(String userId) {
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
         cartItemRepository.deleteByCartId(cart.getId());
     }
 
