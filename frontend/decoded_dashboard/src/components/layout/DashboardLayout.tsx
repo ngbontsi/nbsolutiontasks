@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import {
   LayoutDashboard,
   Users,
@@ -7,6 +7,7 @@ import {
   BarChart3,
   LogOut,
 } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -17,7 +18,7 @@ const navItems = [
 ];
 
 export default function DashboardLayout() {
-  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   return (
     <div className="app-layout">
@@ -43,10 +44,13 @@ export default function DashboardLayout() {
         </nav>
 
         <div className="sidebar-footer">
-          <button
-            className="nav-item logout"
-            onClick={() => navigate("/login")}
-          >
+          {user && (
+            <div className="sidebar-user">
+              <span className="user-name">{user.firstName} {user.lastName}</span>
+              <span className="user-role">{user.role}</span>
+            </div>
+          )}
+          <button className="nav-item logout" onClick={logout}>
             <LogOut size={20} />
             <span>Logout</span>
           </button>

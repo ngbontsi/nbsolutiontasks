@@ -11,21 +11,29 @@ spring:
           uri: ${AUTH_SERVICE_URI:http://localhost:8081}
           predicates:
             - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
 
         - id: restaurant-service
           uri: ${RESTAURANT_SERVICE_URI:http://localhost:8082}
           predicates:
             - Path=/api/restaurant/**
+          filters:
+            - StripPrefix=2
 
         - id: guesthouse-service
           uri: ${GUESTHOUSE_SERVICE_URI:http://localhost:8083}
           predicates:
             - Path=/api/guesthouse/**
+          filters:
+            - StripPrefix=2
 
         - id: marketplace-service
           uri: ${MARKETPLACE_SERVICE_URI:http://localhost:8084}
           predicates:
             - Path=/api/marketplace/**
+          filters:
+            - StripPrefix=2
 
         - id: task-api
           uri: ${TASK_API_URI:http://localhost:8085}

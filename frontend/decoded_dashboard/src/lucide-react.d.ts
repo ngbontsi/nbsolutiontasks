@@ -1,0 +1,25 @@
+declare module 'lucide-react' {
+  import { FC } from 'react';
+  interface IconProps {
+    size?: number | string;
+    color?: string;
+    strokeWidth?: number | string;
+    className?: string;
+  }
+  export const LayoutDashboard: FC<IconProps>;
+  export const Users: FC<IconProps>;
+  export const Activity: FC<IconProps>;
+  export const Store: FC<IconProps>;
+  export const BarChart3: FC<IconProps>;
+  export const LogOut: FC<IconProps>;
+  export const LogIn: FC<IconProps>;
+  export const Search: FC<IconProps>;
+  export const Filter: FC<IconProps>;
+  export const UserCheck: FC<IconProps>;
+  export const UserX: FC<IconProps>;
+  export const Eye: FC<IconProps>;
+  export const Edit2: FC<IconProps>;
+  export const Clock: FC<IconProps>;
+  export const AlertTriangle: FC<IconProps>;
+  export const CheckCircle: FC<IconProps>;
+}

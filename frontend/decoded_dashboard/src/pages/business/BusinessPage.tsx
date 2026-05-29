@@ -1,131 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type {
   Restaurant,
   Guesthouse,
   MarketplaceOrder,
   Task,
 } from "../../types";
+import { fetchRestaurants, fetchGuesthouses, fetchTasks } from "../../services/data";
 
 const mockRestaurants: Restaurant[] = [
-  {
-    id: "1",
-    name: "Zozo food shop",
-    cuisine: "Cradock",
-    rating: 4.5,
-    active: true,
-    menuItemsCount: 32,
-  },
-  {
-    id: "2",
-    name: "Yolisa food shop",
-    cuisine: "Khayelitsha",
-    rating: 4.8,
-    active: true,
-    menuItemsCount: 45,
-  },
-  {
-    id: "3",
-    name: "Kouksie bar",
-    cuisine: "Cradock",
-    rating: 4.2,
-    active: false,
-    menuItemsCount: 28,
-  },
+  { id: "1", name: "Zozo food shop", cuisine: "Cradock", rating: 4.5, active: true, menuItemsCount: 32 },
+  { id: "2", name: "Yolisa food shop", cuisine: "Khayelitsha", rating: 4.8, active: true, menuItemsCount: 45 },
+  { id: "3", name: "Kouksie bar", cuisine: "Cradock", rating: 4.2, active: false, menuItemsCount: 28 },
 ];
 
 const mockGuesthouses: Guesthouse[] = [
-  {
-    id: "1",
-    name: "Rasmen and Sons",
-    location: "Nxuba Lingelihle",
-    rating: 4.6,
-    active: true,
-    roomsCount: 24,
-    reservationsCount: 18,
-  },
-  {
-    id: "2",
-    name: "Mbulelo Lourge",
-    location: "Nxuba Mpolweni",
-    rating: 4.9,
-    active: true,
-    roomsCount: 12,
-    reservationsCount: 10,
-  },
-  {
-    id: "3",
-    name: "Pilitie",
-    location: "Nxuba Michuasdal",
-    rating: 3.8,
-    active: true,
-    roomsCount: 40,
-    reservationsCount: 35,
-  },
+  { id: "1", name: "Rasmen and Sons", location: "Nxuba Lingelihle", rating: 4.6, active: true, roomsCount: 24, reservationsCount: 18 },
+  { id: "2", name: "Mbulelo Lourge", location: "Nxuba Mpolweni", rating: 4.9, active: true, roomsCount: 12, reservationsCount: 10 },
+  { id: "3", name: "Pilitie", location: "Nxuba Michuasdal", rating: 3.8, active: true, roomsCount: 40, reservationsCount: 35 },
 ];
 
 const mockOrders: MarketplaceOrder[] = [
-  {
-    id: "ORD-001",
-    customerName: "Alice M.",
-    total: 89.5,
-    status: "completed",
-    itemsCount: 3,
-    createdAt: "2024-05-01",
-  },
-  {
-    id: "ORD-002",
-    customerName: "Bob K.",
-    total: 45.0,
-    status: "processing",
-    itemsCount: 2,
-    createdAt: "2024-05-02",
-  },
-  {
-    id: "ORD-003",
-    customerName: "Carol W.",
-    total: 120.75,
-    status: "pending",
-    itemsCount: 5,
-    createdAt: "2024-05-03",
-  },
-  {
-    id: "ORD-004",
-    customerName: "Dave R.",
-    total: 33.25,
-    status: "cancelled",
-    itemsCount: 1,
-    createdAt: "2024-05-03",
-  },
+  { id: "ORD-001", customerName: "Alice M.", total: 89.5, status: "completed", itemsCount: 3, createdAt: "2024-05-01" },
+  { id: "ORD-002", customerName: "Bob K.", total: 45.0, status: "processing", itemsCount: 2, createdAt: "2024-05-02" },
+  { id: "ORD-003", customerName: "Carol W.", total: 120.75, status: "pending", itemsCount: 5, createdAt: "2024-05-03" },
+  { id: "ORD-004", customerName: "Dave R.", total: 33.25, status: "cancelled", itemsCount: 1, createdAt: "2024-05-03" },
 ];
 
 const mockTasks: Task[] = [
-  {
-    id: "1",
-    title: "Fix payment gateway timeout",
-    status: "in_progress",
-    priority: "high",
-    createdAt: "2024-05-01",
-  },
-  {
-    id: "2",
-    title: "Add restaurant onboarding flow",
-    status: "pending",
-    priority: "medium",
-    createdAt: "2024-05-02",
-  },
-  {
-    id: "3",
-    title: "Update guesthouse search filters",
-    status: "completed",
-    priority: "low",
-    createdAt: "2024-05-03",
-  },
+  { id: "1", title: "Fix payment gateway timeout", status: "in_progress", priority: "high", createdAt: "2024-05-01" },
+  { id: "2", title: "Add restaurant onboarding flow", status: "pending", priority: "medium", createdAt: "2024-05-02" },
+  { id: "3", title: "Update guesthouse search filters", status: "completed", priority: "low", createdAt: "2024-05-03" },
 ];
 
 type Tab = "restaurants" | "guesthouses" | "orders" | "tasks";
 
 export default function BusinessPage() {
   const [tab, setTab] = useState<Tab>("restaurants");
+  const [restaurants, setRestaurants] = useState<Restaurant[]>(mockRestaurants);
+  const [guesthouses, setGuesthouses] = useState<Guesthouse[]>(mockGuesthouses);
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    async function load() {
+      setLoading(true);
+      const [r, g, t] = await Promise.all([
+        fetchRestaurants(),
+        fetchGuesthouses(),
+        fetchTasks(),
+      ]);
+      if (cancelled) return;
+      if (r.length) setRestaurants(r);
+      if (g.length) setGuesthouses(g);
+      if (t.length) setTasks(t);
+      setLoading(false);
+    }
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
   const tabs: { key: Tab; label: string }[] = [
     { key: "restaurants", label: "Restaurants" },
     { key: "guesthouses", label: "Guesthouses" },
@@ -154,7 +88,9 @@ export default function BusinessPage() {
 
       <div className="card">
         <div className="table-wrapper">
-          {tab === "restaurants" && (
+          {loading ? (
+            <p style={{ padding: "20px", color: "var(--text-muted)", fontSize: "13px" }}>Loading...</p>
+          ) : tab === "restaurants" ? (
             <table className="data-table">
               <thead>
                 <tr>
@@ -166,16 +102,14 @@ export default function BusinessPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockRestaurants.map((r) => (
+                {restaurants.map((r) => (
                   <tr key={r.id}>
                     <td>{r.name}</td>
                     <td>{r.cuisine}</td>
-                    <td>{r.rating}</td>
-                    <td>{r.menuItemsCount}</td>
+                    <td>{r.rating || '-'}</td>
+                    <td>{r.menuItemsCount || '-'}</td>
                     <td>
-                      <span
-                        className={`status-indicator ${r.active ? "enabled" : "disabled"}`}
-                      >
+                      <span className={`status-indicator ${r.active ? "enabled" : "disabled"}`}>
                         {r.active ? "Active" : "Inactive"}
                       </span>
                     </td>
@@ -183,9 +117,7 @@ export default function BusinessPage() {
                 ))}
               </tbody>
             </table>
-          )}
-
-          {tab === "guesthouses" && (
+          ) : tab === "guesthouses" ? (
             <table className="data-table">
               <thead>
                 <tr>
@@ -198,17 +130,15 @@ export default function BusinessPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockGuesthouses.map((g) => (
+                {guesthouses.map((g) => (
                   <tr key={g.id}>
                     <td>{g.name}</td>
                     <td>{g.location}</td>
-                    <td>{g.rating}</td>
-                    <td>{g.roomsCount}</td>
-                    <td>{g.reservationsCount}</td>
+                    <td>{g.rating || '-'}</td>
+                    <td>{g.roomsCount || '-'}</td>
+                    <td>{g.reservationsCount || '-'}</td>
                     <td>
-                      <span
-                        className={`status-indicator ${g.active ? "enabled" : "disabled"}`}
-                      >
+                      <span className={`status-indicator ${g.active ? "enabled" : "disabled"}`}>
                         {g.active ? "Active" : "Inactive"}
                       </span>
                     </td>
@@ -216,9 +146,7 @@ export default function BusinessPage() {
                 ))}
               </tbody>
             </table>
-          )}
-
-          {tab === "orders" && (
+          ) : tab === "orders" ? (
             <table className="data-table">
               <thead>
                 <tr>
@@ -237,19 +165,13 @@ export default function BusinessPage() {
                     <td>{o.customerName}</td>
                     <td>{o.itemsCount}</td>
                     <td>R{o.total.toFixed(2)}</td>
-                    <td>
-                      <span className={`status-badge ${o.status}`}>
-                        {o.status}
-                      </span>
-                    </td>
+                    <td><span className={`status-badge ${o.status}`}>{o.status}</span></td>
                     <td>{o.createdAt}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
-          )}
-
-          {tab === "tasks" && (
+          ) : (
             <table className="data-table">
               <thead>
                 <tr>
@@ -260,21 +182,11 @@ export default function BusinessPage() {
                 </tr>
               </thead>
               <tbody>
-                {mockTasks.map((t) => (
+                {tasks.map((t) => (
                   <tr key={t.id}>
                     <td>{t.title}</td>
-                    <td>
-                      <span
-                        className={`badge-priority badge-priority-${t.priority}`}
-                      >
-                        {t.priority}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${t.status}`}>
-                        {t.status.replace("_", " ")}
-                      </span>
-                    </td>
+                    <td><span className={`badge-priority badge-priority-${t.priority}`}>{t.priority}</span></td>
+                    <td><span className={`status-badge ${t.status}`}>{t.status.replace("_", " ")}</span></td>
                     <td>{t.createdAt}</td>
                   </tr>
                 ))}

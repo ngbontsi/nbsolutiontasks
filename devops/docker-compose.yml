@@ -4,7 +4,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - JWT_SECRET=${JWT_SECRET}
+      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-secure-random-string-at-least-32-chars}
       - AUTH_SERVICE_URI=http://auth-service:8081
       - RESTAURANT_SERVICE_URI=http://restaurant-service:8082
       - GUESTHOUSE_SERVICE_URI=http://guesthouse-service:8083
@@ -19,9 +19,9 @@ services:
     build: ../backend/auth-service
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/authdb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
-      - JWT_SECRET=${JWT_SECRET}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-platformpass}
+      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-secure-random-string-at-least-32-chars}
     depends_on:
       - db
     networks:
@@ -29,10 +29,14 @@ services:
 
   task-api:
     build: ../backend/task-api
+    ports:
+      - "8085:8085"
     environment:
+      - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/taskdb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-platformpass}
+      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-secure-random-string-at-least-32-chars}
     depends_on:
       - db
     networks:
@@ -42,8 +46,8 @@ services:
     build: ../backend/restaurant-service
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/restaurantdb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-platformpass}
     depends_on:
       - db
     networks:
@@ -53,8 +57,8 @@ services:
     build: ../backend/guesthouse-service
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/guesthousedb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-platformpass}
     depends_on:
       - db
     networks:
@@ -64,8 +68,8 @@ services:
     build: ../backend/marketplace-service
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/marketplacedb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD}
+      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
+      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-platformpass}
     depends_on:
       - db
     networks:
@@ -74,10 +78,11 @@ services:
   db:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_USER=${DB_USERNAME:-platformuser}
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-platformpass}
     volumes:
       - postgres-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - platform-network
 
