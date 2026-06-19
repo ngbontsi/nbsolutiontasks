@@ -22,4 +22,8 @@ declare module 'lucide-react' {
   export const Clock: FC<IconProps>;
   export const AlertTriangle: FC<IconProps>;
   export const CheckCircle: FC<IconProps>;
+  export const ArrowRight: FC<IconProps>;
+  export const ExternalLink: FC<IconProps>;
+  export const ChevronLeft: FC<IconProps>;
+  export const ChevronRight: FC<IconProps>;
 }

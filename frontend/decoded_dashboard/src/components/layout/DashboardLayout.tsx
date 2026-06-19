@@ -10,11 +10,11 @@ import {
 import { useAuth } from "../../context/AuthContext";
 
 const navItems = [
-  { path: "/", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/users", label: "Users", icon: Users },
-  { path: "/monitoring", label: "Monitoring", icon: Activity },
-  { path: "/business", label: "Business", icon: Store },
-  { path: "/analytics", label: "Analytics", icon: BarChart3 },
+  { path: "/app", label: "Dashboard", icon: LayoutDashboard },
+  { path: "/app/users", label: "Users", icon: Users },
+  { path: "/app/monitoring", label: "Monitoring", icon: Activity },
+  { path: "/app/business", label: "Business", icon: Store },
+  { path: "/app/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 export default function DashboardLayout() {
@@ -33,6 +33,7 @@ export default function DashboardLayout() {
             <NavLink
               key={item.path}
               to={item.path}
+              end={item.path === "/app"}
               className={({ isActive }) =>
                 `nav-item${isActive ? " active" : ""}`
               }
