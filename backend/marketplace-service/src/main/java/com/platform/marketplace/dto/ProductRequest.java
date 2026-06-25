@@ -1,6 +1,6 @@
 package com.platform.marketplace.dto;
 
-public record ProductRequest(String name,
+public record ProductRequest( String name,
                              String description,
                              Double price,
                              Integer stockQuantity,
