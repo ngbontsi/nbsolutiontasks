@@ -3,6 +3,7 @@ package com.platform.auth.controller;
 import com.platform.auth.dto.AuthResponse;
 import com.platform.auth.dto.LoginRequest;
 import com.platform.auth.dto.RegisterRequest;
+import com.platform.auth.dto.UserResponse;
 import com.platform.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,5 +25,10 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @GetMapping("/users")
+    public ResponseEntity<java.util.List<UserResponse>> getAllUsers() {
+        return ResponseEntity.ok(authService.getAllUsers());
     }
 }

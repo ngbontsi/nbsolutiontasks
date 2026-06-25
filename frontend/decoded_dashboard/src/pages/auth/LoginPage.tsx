@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { LogIn } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
@@ -60,6 +60,9 @@ export default function LoginPage() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+        <p className="register-link">
+          Don't have an account? <Link to="/register">Create one</Link>
+        </p>
       </div>
     </div>
   );

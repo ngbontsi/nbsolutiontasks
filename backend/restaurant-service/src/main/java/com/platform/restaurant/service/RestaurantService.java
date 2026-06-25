@@ -1,6 +1,7 @@
 package com.platform.restaurant.service;
 
 import com.platform.restaurant.dto.RestaurantRequest;
+import com.platform.restaurant.dto.RestaurantResponse;
 import com.platform.restaurant.exception.ResourceNotFoundException;
 import com.platform.restaurant.model.Restaurant;
 import com.platform.restaurant.repository.RestaurantRepository;
@@ -15,43 +16,60 @@ public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
 
-    public Restaurant create(RestaurantRequest request) {
+    public RestaurantResponse create(RestaurantRequest request) {
         Restaurant restaurant = Restaurant.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .address(request.getAddress())
-                .phone(request.getPhone())
-                .imageUrl(request.getImageUrl())
+                .name(request.name())
+                .description(request.description())
+                .address(request.address())
+                .phone(request.phone())
+                .imageUrl(request.imageUrl())
                 .build();
-        return restaurantRepository.save(restaurant);
+        return toResponse(restaurantRepository.save(restaurant));
     }
 
-    public List<Restaurant> getAll() {
-        return restaurantRepository.findAll();
+    public List<RestaurantResponse> getAll() {
+        return restaurantRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public List<Restaurant> getActive() {
-        return restaurantRepository.findByActiveTrue();
+    public List<RestaurantResponse> getActive() {
+        return restaurantRepository.findByActiveTrue().stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public Restaurant getById(String id) {
+    public RestaurantResponse getById(String id) {
+        return toResponse(restaurantRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found")));
+    }
+
+    public RestaurantResponse update(String id, RestaurantRequest request) {
+        Restaurant restaurant = getByIdEntity(id);
+        restaurant.setName(request.name());
+        restaurant.setDescription(request.description());
+        restaurant.setAddress(request.address());
+        restaurant.setPhone(request.phone());
+        restaurant.setImageUrl(request.imageUrl());
+        return toResponse(restaurantRepository.save(restaurant));
+    }
+
+    public void delete(String id) {
+        Restaurant restaurant = getByIdEntity(id);
+        restaurant.setActive(false);
+        restaurantRepository.save(restaurant);
+    }
+
+    private Restaurant getByIdEntity(String id) {
         return restaurantRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
     }
 
-    public Restaurant update(String id, RestaurantRequest request) {
-        Restaurant restaurant = getById(id);
-        restaurant.setName(request.getName());
-        restaurant.setDescription(request.getDescription());
-        restaurant.setAddress(request.getAddress());
-        restaurant.setPhone(request.getPhone());
-        restaurant.setImageUrl(request.getImageUrl());
-        return restaurantRepository.save(restaurant);
-    }
-
-    public void delete(String id) {
-        Restaurant restaurant = getById(id);
-        restaurant.setActive(false);
-        restaurantRepository.save(restaurant);
+    private RestaurantResponse toResponse(Restaurant r) {
+        return new RestaurantResponse(
+                r.getId(), r.getName(), r.getDescription(),
+                r.getAddress(), r.getPhone(), r.getImageUrl(),
+                r.isActive(), r.getCreatedAt(), r.getUpdatedAt()
+        );
     }
 }

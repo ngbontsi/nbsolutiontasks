@@ -1,6 +1,7 @@
 package com.platform.guesthouse.service;
 
 import com.platform.guesthouse.dto.ReservationRequest;
+import com.platform.guesthouse.dto.ReservationResponse;
 import com.platform.guesthouse.exception.ResourceNotFoundException;
 import com.platform.guesthouse.model.Reservation;
 import com.platform.guesthouse.repository.ReservationRepository;
@@ -17,29 +18,39 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final RoomService roomService;
 
-    public Reservation create(ReservationRequest request) {
+    public ReservationResponse create(ReservationRequest request) {
         Reservation reservation = Reservation.builder()
-                .roomId(request.getRoomId())
-                .userId(request.getUserId())
-                .checkInDate(LocalDate.parse(request.getCheckInDate()))
-                .checkOutDate(LocalDate.parse(request.getCheckOutDate()))
-                .numberOfGuests(request.getNumberOfGuests())
+                .roomId(request.roomId())
+                .userId(request.userId())
+                .checkInDate(LocalDate.parse(request.checkInDate()))
+                .checkOutDate(LocalDate.parse(request.checkOutDate()))
+                .numberOfGuests(request.numberOfGuests())
                 .build();
 
-        var room = roomService.getById(request.getRoomId());
+        var room = roomService.getByIdEntity(request.roomId());
         long nights = java.time.temporal.ChronoUnit.DAYS.between(
             reservation.getCheckInDate(), reservation.getCheckOutDate());
         reservation.setTotalPrice(room.getPricePerNight().doubleValue() * nights);
 
-        return reservationRepository.save(reservation);
+        return toResponse(reservationRepository.save(reservation));
     }
 
-    public List<Reservation> getByUser(String userId) {
-        return reservationRepository.findByUserId(userId);
+    public List<ReservationResponse> getByUser(String userId) {
+        return reservationRepository.findByUserId(userId).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public Reservation getById(String id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+    public ReservationResponse getById(String id) {
+        return toResponse(reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found")));
+    }
+
+    private ReservationResponse toResponse(Reservation r) {
+        return new ReservationResponse(
+                r.getId(), r.getRoomId(), r.getUserId(),
+                r.getCheckInDate(), r.getCheckOutDate(), r.getNumberOfGuests(),
+                r.getStatus(), r.getTotalPrice(), r.getCreatedAt()
+        );
     }
 }

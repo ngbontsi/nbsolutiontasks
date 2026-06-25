@@ -26,6 +26,11 @@
 - Externalized secrets from all application.yml files (JWT, DB credentials) into env vars
 - Deleted stale `feature/decoded_dashboard` branch locally
 - Cleaned gh-pages: removed leaked source files (workflows, Flutter configs, backend source, .env.example)
+- Added register page to dashboard (`RegisterPage.tsx`) with name, email, password, role fields
+- Added `register` function to `AuthContext` — calls `POST /api/auth/register`, auto-logs in after registration
+- Updated `LoginPage.tsx` with "Don't have an account?" link to `/register`
+- Updated `App.tsx` with `/register` route
+- Added CSS styles for form-row, select, and register-link
 
 ## Mock Data Status
 | App | Data Source | Real Backend? |

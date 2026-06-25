@@ -1,9 +1,6 @@
 package com.platform.marketplace.dto;
 
-import lombok.Data;
+public record OrderRequest(String userId,
+                           String shippingAddress) {
 
-@Data
-public class OrderRequest {
-    private String userId;
-    private String shippingAddress;
 }

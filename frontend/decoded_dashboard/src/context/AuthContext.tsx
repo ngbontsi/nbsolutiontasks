@@ -9,11 +9,20 @@ export interface AuthUser {
   role: string;
 }
 
+interface RegisterData {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+}
+
 interface AuthContextType {
   user: AuthUser | null;
   token: string | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
 }
@@ -45,6 +54,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(u);
   };
 
+  const register = async (data: RegisterData) => {
+    const res = await api.post('/api/auth/register', {
+      email: data.email,
+      password: data.password,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      role: data.role,
+    });
+    const d = res.data;
+    const u: AuthUser = { id: d.userId, email: d.email, firstName: d.firstName, lastName: d.lastName, role: d.role };
+    localStorage.setItem('auth_token', d.token);
+    localStorage.setItem('auth_user', JSON.stringify(u));
+    setToken(d.token);
+    setUser(u);
+  };
+
   const logout = () => {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_user');
@@ -53,7 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, register, logout, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

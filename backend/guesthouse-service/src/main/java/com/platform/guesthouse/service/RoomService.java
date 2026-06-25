@@ -1,6 +1,7 @@
 package com.platform.guesthouse.service;
 
 import com.platform.guesthouse.dto.RoomRequest;
+import com.platform.guesthouse.dto.RoomResponse;
 import com.platform.guesthouse.exception.ResourceNotFoundException;
 import com.platform.guesthouse.model.Room;
 import com.platform.guesthouse.repository.RoomRepository;
@@ -15,42 +16,57 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
 
-    public Room create(RoomRequest request) {
+    public RoomResponse create(RoomRequest request) {
         Room room = Room.builder()
-                .guesthouseId(request.getGuesthouseId())
-                .roomNumber(request.getRoomNumber())
-                .type(request.getType())
-                .pricePerNight(request.getPricePerNight() != null ? 
-                    java.math.BigDecimal.valueOf(request.getPricePerNight()) : null)
-                .capacity(request.getCapacity())
-                .amenities(request.getAmenities())
+                .guesthouseId(request.guesthouseId())
+                .roomNumber(request.roomNumber())
+                .type(request.type())
+                .pricePerNight(request.pricePerNight() != null ?
+                    java.math.BigDecimal.valueOf(request.pricePerNight()) : null)
+                .capacity(request.capacity())
+                .amenities(request.amenities())
                 .build();
-        return roomRepository.save(room);
+        return toResponse(roomRepository.save(room));
     }
 
-    public List<Room> getByGuesthouse(String guesthouseId) {
-        return roomRepository.findByGuesthouseId(guesthouseId);
+    public List<RoomResponse> getByGuesthouse(String guesthouseId) {
+        return roomRepository.findByGuesthouseId(guesthouseId).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public Room getById(String id) {
+    public RoomResponse getById(String id) {
+        return toResponse(roomRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Room not found")));
+    }
+
+    public RoomResponse update(String id, RoomRequest request) {
+        Room room = getByIdEntity(id);
+        room.setRoomNumber(request.roomNumber());
+        room.setType(request.type());
+        room.setPricePerNight(request.pricePerNight() != null ?
+            java.math.BigDecimal.valueOf(request.pricePerNight()) : null);
+        room.setCapacity(request.capacity());
+        room.setAmenities(request.amenities());
+        return toResponse(roomRepository.save(room));
+    }
+
+    public void delete(String id) {
+        Room room = getByIdEntity(id);
+        room.setAvailable(false);
+        roomRepository.save(room);
+    }
+
+    Room getByIdEntity(String id) {
         return roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found"));
     }
 
-    public Room update(String id, RoomRequest request) {
-        Room room = getById(id);
-        room.setRoomNumber(request.getRoomNumber());
-        room.setType(request.getType());
-        room.setPricePerNight(request.getPricePerNight() != null ? 
-            java.math.BigDecimal.valueOf(request.getPricePerNight()) : null);
-        room.setCapacity(request.getCapacity());
-        room.setAmenities(request.getAmenities());
-        return roomRepository.save(room);
-    }
-
-    public void delete(String id) {
-        Room room = getById(id);
-        room.setAvailable(false);
-        roomRepository.save(room);
+    private RoomResponse toResponse(Room r) {
+        return new RoomResponse(
+                r.getId(), r.getGuesthouseId(), r.getRoomNumber(),
+                r.getType(), r.getPricePerNight(), r.getCapacity(),
+                r.getAmenities(), r.isAvailable(), r.getCreatedAt()
+        );
     }
 }

@@ -55,25 +55,25 @@ public class CartService {
     }
 
     public CartResponse addToCart(CartItemRequest request) {
-        Cart cart = getOrCreateCart(request.getUserId());
+        Cart cart = getOrCreateCart(request.userId());
         
         CartItem existingItem = cartItemRepository
-                .findByCartIdAndProductId(cart.getId(), request.getProductId())
+                .findByCartIdAndProductId(cart.getId(), request.productId())
                 .orElse(null);
 
         if (existingItem != null) {
-            existingItem.setQuantity(existingItem.getQuantity() + request.getQuantity());
+            existingItem.setQuantity(existingItem.getQuantity() + request.quantity());
             cartItemRepository.save(existingItem);
         } else {
             CartItem newItem = CartItem.builder()
                     .cartId(cart.getId())
-                    .productId(request.getProductId())
-                    .quantity(request.getQuantity())
+                    .productId(request.productId())
+                    .quantity(request.quantity())
                     .build();
             cartItemRepository.save(newItem);
         }
 
-        return getCart(request.getUserId());
+        return getCart(request.userId());
     }
 
     public CartResponse updateCartItem(String userId, String productId, int quantity) {

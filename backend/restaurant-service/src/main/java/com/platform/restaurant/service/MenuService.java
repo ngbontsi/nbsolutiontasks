@@ -1,8 +1,11 @@
 package com.platform.restaurant.service;
 
 import com.platform.restaurant.dto.MenuItemRequest;
+import com.platform.restaurant.dto.MenuItemResponse;
+import com.platform.restaurant.dto.RestaurantResponse;
 import com.platform.restaurant.exception.ResourceNotFoundException;
 import com.platform.restaurant.model.MenuItem;
+import com.platform.restaurant.model.Restaurant;
 import com.platform.restaurant.repository.MenuItemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,40 +18,59 @@ public class MenuService {
 
     private final MenuItemRepository menuItemRepository;
 
-    public MenuItem create(MenuItemRequest request) {
+    public MenuItemResponse create(MenuItemRequest request) {
         MenuItem item = MenuItem.builder()
-                .restaurantId(request.getRestaurantId())
-                .name(request.getName())
-                .description(request.getDescription())
-                .price(request.getPrice() != null ? java.math.BigDecimal.valueOf(request.getPrice()) : null)
-                .category(request.getCategory())
-                .imageUrl(request.getImageUrl())
+                .restaurantId(request.restaurantId())
+                .name(request.name())
+                .description(request.description())
+                .price(request.price() != null ? java.math.BigDecimal.valueOf(request.price()) : null)
+                .category(request.category())
+                .imageUrl(request.imageUrl())
                 .build();
-        return menuItemRepository.save(item);
+        return toResponse(menuItemRepository.save(item));
     }
 
-    public List<MenuItem> getByRestaurant(String restaurantId) {
-        return menuItemRepository.findByRestaurantId(restaurantId);
+    public List<MenuItemResponse> getByRestaurant(String restaurantId) {
+        return menuItemRepository.findByRestaurantId(restaurantId).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public MenuItem getById(String id) {
-        return menuItemRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Menu item not found"));
+    public MenuItemResponse getById(String id) {
+        return toResponse(menuItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Menu item not found")));
     }
 
-    public MenuItem update(String id, MenuItemRequest request) {
-        MenuItem item = getById(id);
-        item.setName(request.getName());
-        item.setDescription(request.getDescription());
-        item.setPrice(request.getPrice() != null ? java.math.BigDecimal.valueOf(request.getPrice()) : null);
-        item.setCategory(request.getCategory());
-        item.setImageUrl(request.getImageUrl());
-        return menuItemRepository.save(item);
+    public MenuItemResponse update(String id, MenuItemRequest request) {
+        MenuItem item = getByIdEntity(id);
+        item.setName(request.name());
+        item.setDescription(request.description());
+        item.setPrice(request.price() != null ? java.math.BigDecimal.valueOf(request.price()) : null);
+        item.setCategory(request.category());
+        item.setImageUrl(request.imageUrl());
+        return toResponse(menuItemRepository.save(item));
     }
 
     public void delete(String id) {
-        MenuItem item = getById(id);
+        MenuItem item = getByIdEntity(id);
         item.setAvailable(false);
         menuItemRepository.save(item);
+    }
+    public List<MenuItemResponse> getAvailable(String resturantId){
+     return  menuItemRepository.findByRestaurantIdAndAvailableTrue(resturantId).stream()
+             .map(this::toResponse)
+             .toList();
+    }
+
+    private MenuItem getByIdEntity(String id) {
+        return menuItemRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Restaurant not found"));
+    }
+    private MenuItemResponse toResponse(MenuItem r) {
+        return new MenuItemResponse(
+                r.getId(), r.getRestaurantId(), r.getName(),
+                r.getDescription(), r.getPrice(), r.getCategory(),
+                r.getImageUrl(), r.isAvailable(), r.getCreatedAt()
+        );
     }
 }

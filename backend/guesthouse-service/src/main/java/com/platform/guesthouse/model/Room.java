@@ -1,17 +1,16 @@
 package com.platform.guesthouse.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "rooms")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -38,6 +37,19 @@ public class Room {
     private boolean available;
 
     private LocalDateTime createdAt;
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj) return true;
+        if (obj==null || getClass() != obj.getClass()) return false;
+        Room room = (Room) obj;
+        return id != null && Objects.equals(room.id,id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
     @PrePersist
     protected void onCreate() {

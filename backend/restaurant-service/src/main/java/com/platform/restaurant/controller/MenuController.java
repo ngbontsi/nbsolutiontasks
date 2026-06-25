@@ -1,6 +1,7 @@
 package com.platform.restaurant.controller;
 
 import com.platform.restaurant.dto.MenuItemRequest;
+import com.platform.restaurant.dto.MenuItemResponse;
 import com.platform.restaurant.model.MenuItem;
 import com.platform.restaurant.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,22 +31,22 @@ public class MenuController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Menu created successfully",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = MenuItem.class))),
+                            schema = @Schema(implementation = MenuItemResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content)
     })
-    public ResponseEntity<MenuItem> create(@Valid @RequestBody MenuItemRequest request) {
+    public ResponseEntity<MenuItemResponse> create(@Valid @RequestBody MenuItemRequest request) {
         return ResponseEntity.ok(menuService.create(request));
     }
 
-    @GetMapping("/restaurant/{restaurantId}")
+    @GetMapping("/{restaurantId}")
     @Operation(summary = "Get all menus", description = "Retrieves a list of all menus by resturantId")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved menus",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = MenuItem.class))))
+                            array = @ArraySchema(schema = @Schema(implementation = MenuItemResponse.class))))
     })
-    public ResponseEntity<List<MenuItem>> getByRestaurant(@PathVariable String restaurantId) {
+    public ResponseEntity<List<MenuItemResponse>> getByRestaurant(@PathVariable String restaurantId) {
         return ResponseEntity.ok(menuService.getByRestaurant(restaurantId));
     }
 
@@ -54,11 +55,11 @@ public class MenuController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Menu found",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = MenuItem.class))),
+                            schema = @Schema(implementation = MenuItemResponse.class))),
             @ApiResponse(responseCode = "404", description = "Menu not found",
                     content = @Content)
     })
-    public ResponseEntity<MenuItem> getById(@PathVariable String id) {
+    public ResponseEntity<MenuItemResponse> getById(@PathVariable String id) {
         return ResponseEntity.ok(menuService.getById(id));
     }
 
@@ -67,13 +68,13 @@ public class MenuController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Menu updated successfully",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = MenuItem.class))),
+                            schema = @Schema(implementation = MenuItemResponse.class))),
             @ApiResponse(responseCode = "404", description = "Menu not found",
                     content = @Content),
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content)
     })
-    public ResponseEntity<MenuItem> update(@PathVariable String id, @Valid @RequestBody MenuItemRequest request) {
+    public ResponseEntity<MenuItemResponse> update(@PathVariable String id, @Valid @RequestBody MenuItemRequest request) {
         return ResponseEntity.ok(menuService.update(id, request));
     }
 

@@ -1,59 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, Filter, UserCheck, UserX, Eye, Edit2 } from "lucide-react";
 import type { User, UserRole } from "../../types";
-
-const mockUsers: User[] = [
-  {
-    id: "1",
-    email: "admin@decoded.com",
-    firstName: "Admin",
-    lastName: "User",
-    role: "ADMIN",
-    enabled: true,
-    createdAt: "2024-01-15",
-    updatedAt: "2024-01-15",
-  },
-  {
-    id: "2",
-    email: "ngbontsi@gmail.com",
-    firstName: "Ndimphiwe",
-    lastName: "Bontsi",
-    role: "USER",
-    enabled: true,
-    createdAt: "2024-02-10",
-    updatedAt: "2024-03-05",
-  },
-  {
-    id: "3",
-    email: "nokuthula@gmail.com",
-    firstName: "Nokuthula",
-    lastName: "Mtshiselwa",
-    role: "RESTAURANT_OWNER",
-    enabled: true,
-    createdAt: "2024-03-01",
-    updatedAt: "2024-03-01",
-  },
-  {
-    id: "4",
-    email: "zoleka@gmail.com",
-    firstName: "Zoleka",
-    lastName: "Bontsi",
-    role: "GUESTHOUSE_OWNER",
-    enabled: false,
-    createdAt: "2024-03-12",
-    updatedAt: "2024-04-20",
-  },
-  {
-    id: "5",
-    email: "rasmeni@example.com",
-    firstName: "Rasmeni",
-    lastName: "Alex",
-    role: "USER",
-    enabled: true,
-    createdAt: "2024-04-01",
-    updatedAt: "2024-04-01",
-  },
-];
+import { fetchUsers } from "../../services/data";
 
 const roleBadgeClass: Record<UserRole, string> = {
   ADMIN: "badge-admin",
@@ -73,8 +21,17 @@ function RoleBadge({ role }: { role: UserRole }) {
 export default function UsersPage() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<UserRole | "ALL">("ALL");
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const filtered = mockUsers.filter((u) => {
+  useEffect(() => {
+    fetchUsers().then((data) => {
+      setUsers(data);
+      setLoading(false);
+    });
+  }, []);
+
+  const filtered = users.filter((u) => {
     const matchSearch =
       u.email.toLowerCase().includes(search.toLowerCase()) ||
       `${u.firstName} ${u.lastName}`
@@ -120,6 +77,11 @@ export default function UsersPage() {
         </div>
 
         <div className="table-wrapper">
+          {loading ? (
+            <p style={{ padding: "20px", color: "var(--text-muted)", fontSize: "13px" }}>
+              Loading users...
+            </p>
+          ) : (
           <table className="data-table">
             <thead>
               <tr>
@@ -166,6 +128,7 @@ export default function UsersPage() {
               ))}
             </tbody>
           </table>
+          )}
         </div>
       </div>
     </div>

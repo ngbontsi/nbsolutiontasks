@@ -3,6 +3,7 @@ package com.platform.auth.service;
 import com.platform.auth.dto.AuthResponse;
 import com.platform.auth.dto.LoginRequest;
 import com.platform.auth.dto.RegisterRequest;
+import com.platform.auth.dto.UserResponse;
 import com.platform.auth.model.Role;
 import com.platform.auth.model.User;
 import com.platform.auth.repository.UserRepository;
@@ -33,49 +34,64 @@ public class AuthService {
     private Long jwtExpiration;
 
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
+        if (userRepository.existsByEmail(request.email())) {
             throw new RuntimeException("Email already exists");
         }
 
         User user = User.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .firstName(request.getFirstName())
-                .lastName(request.getLastName())
-                .role(request.getRole() != null ? Role.valueOf(request.getRole().toUpperCase()) : Role.USER)
+                .email(request.email())
+                .password(passwordEncoder.encode(request.password()))
+                .firstName(request.firstName())
+                .lastName(request.lastName())
+                .role(request.role() != null ? Role.valueOf(request.role().toUpperCase()) : Role.USER)
                 .build();
 
         user = userRepository.save(user);
         String token = generateToken(user);
 
-        return AuthResponse.builder()
-                .token(token)
-                .userId(user.getId())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .build();
+        return new AuthResponse(
+                token,
+                user.getId(),
+                user.getEmail(),
+                user.getRole().name(),
+                user.getFirstName(),
+                user.getLastName()
+        );
     }
 
     public AuthResponse login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
             throw new RuntimeException("Invalid credentials");
         }
 
         String token = generateToken(user);
 
-        return AuthResponse.builder()
-                .token(token)
-                .userId(user.getId())
-                .email(user.getEmail())
-                .role(user.getRole().name())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .build();
+        return new AuthResponse(
+                token,
+                user.getId(),
+                user.getEmail(),
+                user.getRole().name(),
+                user.getFirstName(),
+                user.getLastName()
+        );
+    }
+
+    public java.util.List<UserResponse> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> new UserResponse(
+                        user.getId(),
+                        user.getEmail(),
+                        user.getFirstName(),
+                        user.getLastName(),
+                        user.getRole().name(),
+                        user.isEnabled(),
+                        user.getCreatedAt() != null ? user.getCreatedAt().toString() : null,
+                        user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null
+                ))
+                .toList();
     }
 
     private String generateToken(User user) {

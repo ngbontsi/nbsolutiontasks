@@ -1,6 +1,8 @@
 package com.platform.marketplace.service;
 
+import com.platform.marketplace.dto.OrderItemResponse;
 import com.platform.marketplace.dto.OrderRequest;
+import com.platform.marketplace.dto.OrderResponse;
 import com.platform.marketplace.exception.ResourceNotFoundException;
 import com.platform.marketplace.model.*;
 import com.platform.marketplace.repository.CartItemRepository;
@@ -13,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,8 @@ public class OrderService {
     private final ProductService productService;
 
     @Transactional
-    public Order createOrder(OrderRequest request) {
-        Cart cart = cartRepository.findByUserId(request.getUserId())
+    public OrderResponse createOrder(OrderRequest request) {
+        Cart cart = cartRepository.findByUserId(request.userId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
@@ -37,15 +38,15 @@ public class OrderService {
         }
 
         Order order = Order.builder()
-                .userId(request.getUserId())
-                .shippingAddress(request.getShippingAddress())
+                .userId(request.userId())
+                .shippingAddress(request.shippingAddress())
                 .status("PENDING")
                 .build();
 
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         for (CartItem cartItem : cartItems) {
-            Product product = productService.getById(cartItem.getProductId());
+            Product product = productService.getByIdEntity(cartItem.getProductId());
             
             if (product.getStockQuantity() < cartItem.getQuantity()) {
                 throw new RuntimeException("Insufficient stock for product: " + product.getName());
@@ -72,25 +73,49 @@ public class OrderService {
 
         cartItemRepository.deleteByCartId(cart.getId());
 
-        return order;
+        return toResponse(order);
     }
 
-    public List<Order> getUserOrders(String userId) {
-        return orderRepository.findByUserId(userId);
+    public List<OrderResponse> getUserOrders(String userId) {
+        return orderRepository.findByUserId(userId).stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public Order getById(String id) {
+    public OrderResponse getById(String id) {
+        return toResponse(orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found")));
+    }
+
+    public List<OrderItemResponse> getOrderItems(String orderId) {
+        return orderItemRepository.findByOrderId(orderId).stream()
+                .map(this::toItemResponse)
+                .toList();
+    }
+
+    public OrderResponse updateStatus(String orderId, String status) {
+        Order order = getByIdEntity(orderId);
+        order.setStatus(status);
+        return toResponse(orderRepository.save(order));
+    }
+
+    private Order getByIdEntity(String id) {
         return orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
     }
 
-    public List<OrderItem> getOrderItems(String orderId) {
-        return orderItemRepository.findByOrderId(orderId);
+    private OrderResponse toResponse(Order o) {
+        return new OrderResponse(
+                o.getId(), o.getUserId(), o.getTotalAmount(),
+                o.getShippingAddress(), o.getStatus(),
+                o.getCreatedAt(), o.getUpdatedAt()
+        );
     }
 
-    public Order updateStatus(String orderId, String status) {
-        Order order = getById(orderId);
-        order.setStatus(status);
-        return orderRepository.save(order);
+    private OrderItemResponse toItemResponse(OrderItem i) {
+        return new OrderItemResponse(
+                i.getId(), i.getOrderId(), i.getProductId(),
+                i.getProductName(), i.getQuantity(), i.getPrice(), i.getSubtotal()
+        );
     }
 }

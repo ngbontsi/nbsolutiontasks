@@ -1,5 +1,5 @@
 import api from './api';
-import type { Restaurant, Guesthouse, Task } from '../types';
+import type { Restaurant, Guesthouse, Task, User } from '../types';
 
 async function fetchWithFallback<T>(fetch: () => Promise<T>, fallback: T): Promise<T> {
   try {
@@ -7,6 +7,22 @@ async function fetchWithFallback<T>(fetch: () => Promise<T>, fallback: T): Promi
   } catch {
     return fallback;
   }
+}
+
+export async function fetchUsers(): Promise<User[]> {
+  return fetchWithFallback(async () => {
+    const res = await api.get('/api/auth/users');
+    return res.data.map((u: any) => ({
+      id: u.id,
+      email: u.email,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      role: u.role,
+      enabled: u.enabled,
+      createdAt: u.createdAt ? u.createdAt.slice(0, 10) : '',
+      updatedAt: u.updatedAt ? u.updatedAt.slice(0, 10) : '',
+    }));
+  }, []);
 }
 
 export async function fetchRestaurants(): Promise<Restaurant[]> {
