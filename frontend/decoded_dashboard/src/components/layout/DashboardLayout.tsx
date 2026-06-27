@@ -5,6 +5,7 @@ import {
   Activity,
   Store,
   BarChart3,
+  History,
   LogOut,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -15,6 +16,7 @@ const navItems = [
   { path: "/app/monitoring", label: "Monitoring", icon: Activity },
   { path: "/app/business", label: "Business", icon: Store },
   { path: "/app/analytics", label: "Analytics", icon: BarChart3 },
+  { path: "/app/audit", label: "Audit Trail", icon: History },
 ];
 
 export default function DashboardLayout() {

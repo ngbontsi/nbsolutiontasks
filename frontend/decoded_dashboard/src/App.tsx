@@ -9,6 +9,7 @@ import UsersPage from "./pages/users/UsersPage";
 import MonitoringPage from "./pages/monitoring/MonitoringPage";
 import BusinessPage from "./pages/business/BusinessPage";
 import AnalyticsPage from "./pages/analytics/AnalyticsPage";
+import AuditPage from "./pages/audit/AuditPage";
 import "./styles/dashboard.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -32,6 +33,7 @@ function AppRoutes() {
         <Route path="monitoring" element={<MonitoringPage />} />
         <Route path="business" element={<BusinessPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
+        <Route path="audit" element={<AuditPage />} />
       </Route>
       <Route path="*" element={<LandingPage />} />
     </Routes>

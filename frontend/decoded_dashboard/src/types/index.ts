@@ -1,5 +1,14 @@
 export type UserRole = 'ADMIN' | 'USER' | 'RESTAURANT_OWNER' | 'GUESTHOUSE_OWNER';
 
+export interface Role {
+  id: string;
+  name: string;
+  description: string;
+  fullAccess: boolean;
+  modify: boolean;
+  readOnly: boolean;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -55,6 +64,17 @@ export interface Task {
   title: string;
   status: 'pending' | 'in_progress' | 'completed' | 'cancelled';
   priority: 'low' | 'medium' | 'high' | 'urgent';
+  createdAt: string;
+}
+
+export interface AuditLog {
+  id: string;
+  actorId: string;
+  actorEmail: string;
+  action: string;
+  targetId: string;
+  targetType: string;
+  details: string;
   createdAt: string;
 }
 

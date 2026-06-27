@@ -1,5 +1,5 @@
 import api from './api';
-import type { Restaurant, Guesthouse, Task, User } from '../types';
+import type { Restaurant, Guesthouse, Task, User, Role, AuditLog } from '../types';
 
 async function fetchWithFallback<T>(fetch: () => Promise<T>, fallback: T): Promise<T> {
   try {
@@ -51,6 +51,20 @@ export async function fetchGuesthouses(): Promise<Guesthouse[]> {
       roomsCount: 0,
       reservationsCount: 0,
     }));
+  }, []);
+}
+
+export async function fetchAuditLogs(page = 0, size = 50): Promise<{ content: AuditLog[]; totalElements: number }> {
+  return fetchWithFallback(async () => {
+    const res = await api.get(`/api/auth/audit?page=${page}&size=${size}`);
+    return { content: res.data.content, totalElements: res.data.totalElements };
+  }, { content: [], totalElements: 0 });
+}
+
+export async function fetchRoles(): Promise<Role[]> {
+  return fetchWithFallback(async () => {
+    const res = await api.get('/api/auth/roles');
+    return res.data;
   }, []);
 }
 

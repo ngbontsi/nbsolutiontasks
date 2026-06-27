@@ -33,7 +33,8 @@ public class User {
 
     private String lastName;
 
-    @Enumerated(EnumType.STRING)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
     private Role role;
 
     private boolean enabled;
@@ -60,7 +61,7 @@ public class User {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
         if (role == null) {
-            role = Role.USER;
+            role = null;
         }
         if (!enabled) {
             enabled = true;

@@ -1,14 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { UserPlus } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { fetchRoles } from '../../services/data';
+import type { Role } from '../../types';
 
 export default function RegisterPage() {
-  const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '', role: 'USER' });
+  const [form, setForm] = useState({ email: '', password: '', firstName: '', lastName: '', role: '' });
+  const [roles, setRoles] = useState<Role[]>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchRoles().then(data => {
+      const filtered = data.filter(r => r.name !== 'ADMIN');
+      setRoles(filtered);
+      if (filtered.length > 0) setForm(prev => ({ ...prev, role: filtered[0].name }));
+    });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,11 +71,11 @@ export default function RegisterPage() {
           </div>
           <div className="form-group">
             <label>Role</label>
-            <select value={form.role} onChange={update('role')}>
-              <option value="USER">User</option>
-              <option value="ADMIN">Admin</option>
-              <option value="RESTAURANT_OWNER">Restaurant Owner</option>
-              <option value="GUESTHOUSE_OWNER">Guesthouse Owner</option>
+            <select value={form.role} onChange={update('role')} required>
+              <option value="" disabled>Select a role</option>
+              {roles.map(r => (
+                <option key={r.id} value={r.name}>{r.name.replace('_', ' ')}</option>
+              ))}
             </select>
           </div>
           <button type="submit" className="login-btn" disabled={loading}>

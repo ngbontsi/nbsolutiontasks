@@ -1,42 +1,73 @@
 import { useState, useEffect } from "react";
-import { Search, Filter, UserCheck, UserX, Eye, Edit2 } from "lucide-react";
-import type { User, UserRole } from "../../types";
-import { fetchUsers } from "../../services/data";
+import { Search, Filter, UserCheck, UserX, Edit2, X } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import api from "../../services/api";
+import type { User, UserRole, Role } from "../../types";
+import { fetchUsers, fetchRoles } from "../../services/data";
 
-const roleBadgeClass: Record<UserRole, string> = {
+const roleBadgeClass: Record<string, string> = {
   ADMIN: "badge-admin",
   USER: "badge-user",
   RESTAURANT_OWNER: "badge-restaurant",
   GUESTHOUSE_OWNER: "badge-guesthouse",
 };
 
-function RoleBadge({ role }: { role: UserRole }) {
+function RoleBadge({ role }: { role: string }) {
   return (
-    <span className={`badge ${roleBadgeClass[role]}`}>
+    <span className={`badge ${roleBadgeClass[role] || "badge-user"}`}>
       {role.replace("_", " ")}
     </span>
   );
 }
 
 export default function UsersPage() {
+  const { user: currentUser } = useAuth();
   const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState<UserRole | "ALL">("ALL");
+  const [roleFilter, setRoleFilter] = useState<string>("ALL");
   const [users, setUsers] = useState<User[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
+  const [editUser, setEditUser] = useState<User | null>(null);
+  const [editRole, setEditRole] = useState("");
+  const [editEnabled, setEditEnabled] = useState(true);
 
-  useEffect(() => {
-    fetchUsers().then((data) => {
-      setUsers(data);
+  const load = () => {
+    setLoading(true);
+    Promise.all([fetchUsers(), fetchRoles()]).then(([u, r]) => {
+      setUsers(u);
+      setRoles(r);
       setLoading(false);
     });
-  }, []);
+  };
+
+  useEffect(load, []);
+
+  const isAdmin = currentUser?.role === "ADMIN";
+
+  const openEdit = (u: User) => {
+    setEditUser(u);
+    setEditRole(u.role);
+    setEditEnabled(u.enabled);
+  };
+
+  const saveEdit = async () => {
+    if (!editUser) return;
+    try {
+      if (editRole !== editUser.role)
+        await api.put(`/api/auth/users/${editUser.id}/role`, { role: editRole });
+      if (editEnabled !== editUser.enabled)
+        await api.put(`/api/auth/users/${editUser.id}/enabled`, { enabled: editEnabled });
+      setEditUser(null);
+      load();
+    } catch {
+      alert("Failed to update user");
+    }
+  };
 
   const filtered = users.filter((u) => {
     const matchSearch =
       u.email.toLowerCase().includes(search.toLowerCase()) ||
-      `${u.firstName} ${u.lastName}`
-        .toLowerCase()
-        .includes(search.toLowerCase());
+      `${u.firstName} ${u.lastName}`.toLowerCase().includes(search.toLowerCase());
     const matchRole = roleFilter === "ALL" || u.role === roleFilter;
     return matchSearch && matchRole;
   });
@@ -63,9 +94,7 @@ export default function UsersPage() {
             <Filter size={18} />
             <select
               value={roleFilter}
-              onChange={(e) =>
-                setRoleFilter(e.target.value as UserRole | "ALL")
-              }
+              onChange={(e) => setRoleFilter(e.target.value)}
             >
               <option value="ALL">All Roles</option>
               <option value="ADMIN">Admin</option>
@@ -117,12 +146,11 @@ export default function UsersPage() {
                   </td>
                   <td>{user.createdAt}</td>
                   <td className="actions">
-                    <button className="btn-icon" title="View">
-                      <Eye size={16} />
-                    </button>
-                    <button className="btn-icon" title="Edit">
-                      <Edit2 size={16} />
-                    </button>
+                    {isAdmin && (
+                      <button className="btn-icon" title="Edit" onClick={() => openEdit(user)}>
+                        <Edit2 size={16} />
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -131,6 +159,39 @@ export default function UsersPage() {
           )}
         </div>
       </div>
+
+      {editUser && (
+        <div className="modal-overlay" onClick={() => setEditUser(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Edit User</h2>
+              <button className="btn-icon" onClick={() => setEditUser(null)}><X size={18} /></button>
+            </div>
+            <div className="modal-body">
+              <p><strong>{editUser.firstName} {editUser.lastName}</strong> ({editUser.email})</p>
+              <div className="form-group">
+                <label>Role</label>
+                <select value={editRole} onChange={e => setEditRole(e.target.value)}>
+                  {roles.map(r => (
+                    <option key={r.id} value={r.name}>{r.name.replace('_', ' ')}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label>Status</label>
+                <select value={editEnabled ? "true" : "false"} onChange={e => setEditEnabled(e.target.value === "true")}>
+                  <option value="true">Active</option>
+                  <option value="false">Disabled</option>
+                </select>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-secondary" onClick={() => setEditUser(null)}>Cancel</button>
+              <button className="btn btn-primary" onClick={saveEdit}>Save</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

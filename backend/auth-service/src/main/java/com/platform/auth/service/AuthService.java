@@ -4,8 +4,8 @@ import com.platform.auth.dto.AuthResponse;
 import com.platform.auth.dto.LoginRequest;
 import com.platform.auth.dto.RegisterRequest;
 import com.platform.auth.dto.UserResponse;
-import com.platform.auth.model.Role;
 import com.platform.auth.model.User;
+import com.platform.auth.repository.RoleRepository;
 import com.platform.auth.repository.UserRepository;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -26,6 +26,8 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+    private final AuditService auditService;
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -38,22 +40,39 @@ public class AuthService {
             throw new RuntimeException("Email already exists");
         }
 
+        var role = roleRepository.findByName("USER")
+                .orElseThrow(() -> new RuntimeException("Default role not found"));
+
+        if (request.role() != null) {
+            var requested = roleRepository.findByName(request.role().toUpperCase()).orElse(null);
+            if (requested == null) {
+                throw new IllegalArgumentException("Invalid role: " + request.role());
+            }
+            if (requested.getName().equals("ADMIN")) {
+                throw new IllegalArgumentException("Cannot register as ADMIN");
+            }
+            role = requested;
+        }
+
         User user = User.builder()
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .firstName(request.firstName())
                 .lastName(request.lastName())
-                .role(request.role() != null ? Role.valueOf(request.role().toUpperCase()) : Role.USER)
+                .role(role)
                 .build();
 
         user = userRepository.save(user);
         String token = generateToken(user);
 
+        auditService.log(user.getId(), user.getEmail(), "REGISTER",
+                user.getId(), "USER", "Registered as " + role.getName());
+
         return new AuthResponse(
                 token,
                 user.getId(),
                 user.getEmail(),
-                user.getRole().name(),
+                user.getRole().getName(),
                 user.getFirstName(),
                 user.getLastName()
         );
@@ -69,11 +88,14 @@ public class AuthService {
 
         String token = generateToken(user);
 
+        auditService.log(user.getId(), user.getEmail(), "LOGIN",
+                user.getId(), "USER", "Logged in");
+
         return new AuthResponse(
                 token,
                 user.getId(),
                 user.getEmail(),
-                user.getRole().name(),
+                user.getRole().getName(),
                 user.getFirstName(),
                 user.getLastName()
         );
@@ -81,22 +103,56 @@ public class AuthService {
 
     public java.util.List<UserResponse> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(user -> new UserResponse(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getFirstName(),
-                        user.getLastName(),
-                        user.getRole().name(),
-                        user.isEnabled(),
-                        user.getCreatedAt() != null ? user.getCreatedAt().toString() : null,
-                        user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null
-                ))
+                .map(this::toUserResponse)
                 .toList();
+    }
+
+    public UserResponse updateUserRole(String id, String newRoleName, String actorId, String actorEmail) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (newRoleName == null) {
+            throw new RuntimeException("Role is required");
+        }
+        String oldRole = user.getRole().getName();
+        var role = roleRepository.findByName(newRoleName.toUpperCase())
+                .orElseThrow(() -> new RuntimeException("Role not found: " + newRoleName));
+        user.setRole(role);
+        UserResponse res = toUserResponse(userRepository.save(user));
+
+        auditService.log(actorId, actorEmail, "UPDATE_ROLE",
+                id, "USER", "Role changed from " + oldRole + " to " + newRoleName.toUpperCase());
+
+        return res;
+    }
+
+    public UserResponse toggleUserEnabled(String id, boolean enabled, String actorId, String actorEmail) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setEnabled(enabled);
+        UserResponse res = toUserResponse(userRepository.save(user));
+
+        auditService.log(actorId, actorEmail, enabled ? "ENABLE_USER" : "DISABLE_USER",
+                id, "USER", "User " + (enabled ? "enabled" : "disabled"));
+
+        return res;
+    }
+
+    private UserResponse toUserResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getRole().getName(),
+                user.isEnabled(),
+                user.getCreatedAt() != null ? user.getCreatedAt().toString() : null,
+                user.getUpdatedAt() != null ? user.getUpdatedAt().toString() : null
+        );
     }
 
     private String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", user.getRole().name());
+        claims.put("role", user.getRole().getName());
         claims.put("email", user.getEmail());
 
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
