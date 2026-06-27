@@ -8,7 +8,8 @@ $WebsiteRoot = "$PlatformRoot\..\business Processes\website"
 $apps = @(
     @{ Name = "butcher-shop";       Path = "$PlatformRoot\frontend\butcher-shop";         Dest = "butcher-shop" },
     @{ Name = "guesthouse-client";  Path = "$PlatformRoot\frontend\guesthouse-client";    Dest = "guesthouse-client" },
-    @{ Name = "dashboard";          Path = "$PlatformRoot\frontend\decoded_dashboard";    Dest = "dashboard" }
+    @{ Name = "dashboard";          Path = "$PlatformRoot\frontend\decoded_dashboard";    Dest = "dashboard" },
+    @{ Name = "zozos-shop";         Path = "$PlatformRoot\frontend\zozos-shop";           Dest = "zozos-shop" }
 )
 
 Write-Host "`n========== Deploying to GitHub Pages ==========" -ForegroundColor Cyan
