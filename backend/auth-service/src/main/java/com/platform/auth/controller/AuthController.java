@@ -59,4 +59,17 @@ public class AuthController {
         }
         return ResponseEntity.ok(authService.toggleUserEnabled(id, body.get("enabled"), callerId, callerEmail));
     }
+
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(
+            @PathVariable String id,
+            @RequestHeader("X-User-Role") String callerRole,
+            @RequestHeader("X-User-Id") String callerId,
+            @RequestHeader("X-User-Email") String callerEmail) {
+        if (!"ADMIN".equals(callerRole)) {
+            return ResponseEntity.status(403).build();
+        }
+        authService.deleteUser(id, callerId, callerEmail);
+        return ResponseEntity.noContent().build();
+    }
 }

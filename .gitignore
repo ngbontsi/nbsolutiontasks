@@ -51,6 +51,8 @@ frontend/butcher-shop/dist/
 # Guesthouse Client
 frontend/guesthouse-client/node_modules/
 frontend/guesthouse-client/dist/
+OFFLINE.md
+AGENTS.md
 
 # Decoded solution platform (nested)
 decoded solution platform/

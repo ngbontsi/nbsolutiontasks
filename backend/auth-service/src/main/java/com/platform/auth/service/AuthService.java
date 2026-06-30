@@ -137,6 +137,14 @@ public class AuthService {
         return res;
     }
 
+    public void deleteUser(String id, String actorId, String actorEmail) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        auditService.log(actorId, actorEmail, "DELETE_USER",
+                id, "USER", "Deleted user " + user.getEmail());
+        userRepository.delete(user);
+    }
+
     private UserResponse toUserResponse(User user) {
         return new UserResponse(
                 user.getId(),
