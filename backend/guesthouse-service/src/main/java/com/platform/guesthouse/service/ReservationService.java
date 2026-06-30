@@ -18,10 +18,10 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final RoomService roomService;
 
-    public ReservationResponse create(ReservationRequest request) {
+    public ReservationResponse create(ReservationRequest request, String userId) {
         Reservation reservation = Reservation.builder()
                 .roomId(request.roomId())
-                .userId(request.userId())
+                .userId(userId)
                 .checkInDate(LocalDate.parse(request.checkInDate()))
                 .checkOutDate(LocalDate.parse(request.checkOutDate()))
                 .numberOfGuests(request.numberOfGuests())
@@ -41,9 +41,17 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse getById(String id) {
-        return toResponse(reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found")));
+    public ReservationResponse getById(String id, String userId, String userRole) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found"));
+        if (!isAdmin(userRole) && !userId.equals(reservation.getUserId())) {
+            throw new ResourceNotFoundException("Reservation not found");
+        }
+        return toResponse(reservation);
+    }
+
+    private boolean isAdmin(String userRole) {
+        return "ADMIN".equals(userRole);
     }
 
     private ReservationResponse toResponse(Reservation r) {

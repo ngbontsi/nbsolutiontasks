@@ -31,6 +31,13 @@
 - Updated `LoginPage.tsx` with "Don't have an account?" link to `/register`
 - Updated `App.tsx` with `/register` route
 - Added CSS styles for form-row, select, and register-link
+- Deleted `task-api` from source, docker-compose, gateway routes, and DB init (taskdb removed)
+- Added `ownerId` columns to Restaurant, MenuItem, Guesthouse, Room, Product entities
+- Updated all controllers and services to read `X-User-Id` and `X-User-Role` headers for RLS enforcement
+- Added admin bypass: ADMIN role sees all data, others scoped to their own `ownerId`
+- Built and injected all JARs into running containers (api-gateway, restaurant, guesthouse, marketplace)
+- Verified RLS end-to-end: create scoped to caller, list filtered by ownerId, writes enforce ownership
+- Updated OFFLINE.md with task-api removal and RLS documentation
 
 ## Mock Data Status
 | App | Data Source | Real Backend? |
@@ -44,6 +51,14 @@
 - Butcher shop needs real product content populated from user's hard-copy documents
 - User to provide product data via voice-to-text or spreadsheet template
 
+### Done (RLS Implementation)
+- Deleted task-api from source, docker-compose, gateway routes, and DB init
+- Added ownerId to Restaurant, MenuItem, Guesthouse, Room, Product entities
+- Updated DTOs, repos, controllers, services for ownership enforcement
+- Admin bypass via X-User-Role header (ADMIN sees all data)
+- Built and injected JARs into all 4 running containers
+- Verified RLS end-to-end across all 3 services
+
 ### Blocked
 - (none)
 
@@ -55,6 +70,8 @@
 - All deployment automated via `deploy.ps1`/`deploy.sh` to avoid manual branch switching
 - Dockerfiles updated to Java 21 to match pom.xml target
 - Secrets externalized to env vars with sensible defaults in application.yml
+- **RLS approach**: Application-level Row-Level Security via `ownerId` fields + `X-User-Id`/`X-User-Role` header enforcement. ADMIN role bypasses ownership checks. task-api deleted (was reference RLS implementation).
+- **JAR inject workflow**: Build with WSL `mvn` → `docker cp` → restart, avoids full image rebuild for fast iteration.
 
 ## Next Steps
 - Provide butcher shop product data (voice-to-text or CSV template)
@@ -64,13 +81,14 @@
 - (Future) Wire frontend demos to real Spring Boot backend APIs when ready
 
 ## Critical Context
-- Backend: 6 Spring Boot microservices (api-gateway, auth, guesthouse, marketplace, restaurant, task-api) with Docker and k8s configs, but **no running backend** — all frontends currently use mock data
+- Backend: 5 Spring Boot microservices (api-gateway, auth, guesthouse, marketplace, restaurant) with Docker configs — **backend running on localhost:8080-8084**
 - Auth-service has Keycloak dependency but no Keycloak docker-compose or config found
 - Guesthouse-service missing `application.yml` (was deleted/recreated)
-- `frontend/task_app/` is a Flutter project — only app with real API integration
+- `frontend/task_app/` is a Flutter project — only app with real API integration (Flutter SDK not installed)
 - WSL mount: `/mnt/c/Users/admin/Desktop/decoded\ solution\ platform/platform/`
 - `.git/index.lock` may stall git operations; delete with `Remove-Item -Force .git/index.lock`
 - gh-pages currently serves: static landing page (root), butcher-shop/, guesthouse-client/, dashboard/
+- RLS enforced via `X-User-Id`/`X-User-Role` headers; ADMIN bypasses ownership checks
 
 ## Relevant Files
 - `devops/docker-compose.yml`: Updated build paths & env vars for secrets
@@ -85,3 +103,6 @@
 - `backend/*/Dockerfile`: Now all using `eclipse-temurin:21-jdk-alpine` / `21-jre-alpine`
 - `backend/*/src/main/resources/application.yml`: Secrets now use `${ENV_VAR:default}` pattern
 - `frontend/task_app/`: Flutter mobile app (only app with real API integration)
+- `backend/*/src/main/java/**/service/*.java`: All services now enforce RLS via ownerId checks
+- `backend/*/src/main/java/**/controller/*.java`: Controllers read X-User-Id/X-User-Role headers
+- `OFFLINE.md`: Complete offline reference including RLS documentation

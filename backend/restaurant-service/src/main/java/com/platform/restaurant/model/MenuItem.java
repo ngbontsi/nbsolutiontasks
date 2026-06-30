@@ -23,6 +23,9 @@ public class MenuItem {
     @Column(nullable = false)
     private String restaurantId;
 
+    @Column(name = "owner_id")
+    private String ownerId;
+
     @Column(nullable = false)
     private String name;
 

@@ -32,56 +32,50 @@ public class RestaurantController {
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content)
     })
-    public ResponseEntity<RestaurantResponse> create(@Valid @RequestBody RestaurantRequest request) {
-        return ResponseEntity.ok(restaurantService.create(request));
+    public ResponseEntity<RestaurantResponse> create(
+            @Valid @RequestBody RestaurantRequest request,
+            @RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok(restaurantService.create(request, userId));
     }
 
     @GetMapping
-    public ResponseEntity<List<RestaurantResponse>> getAll() {
-        return ResponseEntity.ok(restaurantService.getAll());
+    public ResponseEntity<List<RestaurantResponse>> getAll(
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole) {
+        return ResponseEntity.ok(restaurantService.getAll(userId, userRole));
     }
 
     @GetMapping("/active")
-    public ResponseEntity<List<RestaurantResponse>> getActive() {
-        return ResponseEntity.ok(restaurantService.getActive());
+    public ResponseEntity<List<RestaurantResponse>> getActive(
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole) {
+        return ResponseEntity.ok(restaurantService.getActive(userId, userRole));
     }
 
     @GetMapping("/{id}")
-    @Operation(summary = "Get Restaurant by ID", description = "Retrieves a single restaurant by its ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Restaurant found",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = RestaurantResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Restaurant not found",
-                    content = @Content)
-    })
-    public ResponseEntity<RestaurantResponse> getById(@PathVariable String id) {
-        return ResponseEntity.ok(restaurantService.getById(id));
+    public ResponseEntity<RestaurantResponse> getById(
+            @PathVariable String id,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole) {
+        return ResponseEntity.ok(restaurantService.getById(id, userId, userRole));
     }
 
     @PutMapping("/{id}")
-    @Operation(summary = "Update a Restaurant", description = "Updates an existing restaurant by its ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Restaurant updated successfully",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = RestaurantResponse.class))),
-            @ApiResponse(responseCode = "404", description = "Restaurant not found",
-                    content = @Content),
-            @ApiResponse(responseCode = "400", description = "Invalid input",
-                    content = @Content)
-    })
-    public ResponseEntity<RestaurantResponse> update(@PathVariable String id, @Valid @RequestBody RestaurantRequest request) {
-        return ResponseEntity.ok(restaurantService.update(id, request));
+    public ResponseEntity<RestaurantResponse> update(
+            @PathVariable String id,
+            @Valid @RequestBody RestaurantRequest request,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Role") String userRole) {
+        return ResponseEntity.ok(restaurantService.update(id, request, userId, userRole));
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete a restaurant", description = "Deletes a restaurant by its ID")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Restaurant deleted successfully"),
-            @ApiResponse(responseCode = "404", description = "Restaurant not found")
-    })
-    public ResponseEntity<Void> delete(@PathVariable String id) {
-        restaurantService.delete(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable String id,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Role") String userRole) {
+        restaurantService.delete(id, userId, userRole);
         return ResponseEntity.noContent().build();
     }
+
 }

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 public record MenuItemResponse(
                                 String id,
  String restaurantId,
+ String ownerId,
  String name,
  String description,
  BigDecimal price,

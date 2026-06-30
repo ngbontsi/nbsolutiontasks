@@ -1,8 +1,7 @@
 package com.platform.marketplace.dto;
 
 
-public record CartItemRequest(String userId,
-                              String productId,
+public record CartItemRequest(String productId,
                               Integer quantity) {
 
 }

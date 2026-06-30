@@ -1,6 +1,5 @@
 package com.platform.marketplace.dto;
 
-public record OrderRequest(String userId,
-                           String shippingAddress) {
+public record OrderRequest(String shippingAddress) {
 
 }

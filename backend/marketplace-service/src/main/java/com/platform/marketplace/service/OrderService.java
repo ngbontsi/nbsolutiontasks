@@ -27,8 +27,8 @@ public class OrderService {
     private final ProductService productService;
 
     @Transactional
-    public OrderResponse createOrder(OrderRequest request) {
-        Cart cart = cartRepository.findByUserId(request.userId())
+    public OrderResponse createOrder(OrderRequest request, String userId) {
+        Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
 
         List<CartItem> cartItems = cartItemRepository.findByCartId(cart.getId());
@@ -38,7 +38,7 @@ public class OrderService {
         }
 
         Order order = Order.builder()
-                .userId(request.userId())
+                .userId(userId)
                 .shippingAddress(request.shippingAddress())
                 .status("PENDING")
                 .build();
@@ -82,12 +82,19 @@ public class OrderService {
                 .toList();
     }
 
-    public OrderResponse getById(String id) {
-        return toResponse(orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found")));
+    public OrderResponse getById(String id, String userId, String userRole) {
+        Order order = getByIdEntity(id);
+        if (!isAdmin(userRole) && !userId.equals(order.getUserId())) {
+            throw new ResourceNotFoundException("Order not found");
+        }
+        return toResponse(order);
     }
 
-    public List<OrderItemResponse> getOrderItems(String orderId) {
+    public List<OrderItemResponse> getOrderItems(String orderId, String userId, String userRole) {
+        Order order = getByIdEntity(orderId);
+        if (!isAdmin(userRole) && !userId.equals(order.getUserId())) {
+            throw new ResourceNotFoundException("Order not found");
+        }
         return orderItemRepository.findByOrderId(orderId).stream()
                 .map(this::toItemResponse)
                 .toList();
@@ -97,6 +104,10 @@ public class OrderService {
         Order order = getByIdEntity(orderId);
         order.setStatus(status);
         return toResponse(orderRepository.save(order));
+    }
+
+    private boolean isAdmin(String userRole) {
+        return "ADMIN".equals(userRole);
     }
 
     private Order getByIdEntity(String id) {

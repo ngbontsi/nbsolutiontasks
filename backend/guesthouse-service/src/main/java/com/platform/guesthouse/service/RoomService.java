@@ -16,9 +16,10 @@ public class RoomService {
 
     private final RoomRepository roomRepository;
 
-    public RoomResponse create(RoomRequest request) {
+    public RoomResponse create(RoomRequest request, String ownerId) {
         Room room = Room.builder()
                 .guesthouseId(request.guesthouseId())
+                .ownerId(ownerId)
                 .roomNumber(request.roomNumber())
                 .type(request.type())
                 .pricePerNight(request.pricePerNight() != null ?
@@ -35,13 +36,19 @@ public class RoomService {
                 .toList();
     }
 
-    public RoomResponse getById(String id) {
-        return toResponse(roomRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Room not found")));
+    public RoomResponse getById(String id, String userId, String userRole) {
+        Room room = getByIdEntity(id);
+        if (!isAdmin(userRole) && userId != null && !userId.equals(room.getOwnerId())) {
+            throw new ResourceNotFoundException("Room not found");
+        }
+        return toResponse(room);
     }
 
-    public RoomResponse update(String id, RoomRequest request) {
+    public RoomResponse update(String id, RoomRequest request, String userId, String userRole) {
         Room room = getByIdEntity(id);
+        if (!isAdmin(userRole) && !userId.equals(room.getOwnerId())) {
+            throw new ResourceNotFoundException("Room not found");
+        }
         room.setRoomNumber(request.roomNumber());
         room.setType(request.type());
         room.setPricePerNight(request.pricePerNight() != null ?
@@ -51,10 +58,17 @@ public class RoomService {
         return toResponse(roomRepository.save(room));
     }
 
-    public void delete(String id) {
+    public void delete(String id, String userId, String userRole) {
         Room room = getByIdEntity(id);
+        if (!isAdmin(userRole) && !userId.equals(room.getOwnerId())) {
+            throw new ResourceNotFoundException("Room not found");
+        }
         room.setAvailable(false);
         roomRepository.save(room);
+    }
+
+    private boolean isAdmin(String userRole) {
+        return "ADMIN".equals(userRole);
     }
 
     Room getByIdEntity(String id) {
@@ -64,7 +78,7 @@ public class RoomService {
 
     private RoomResponse toResponse(Room r) {
         return new RoomResponse(
-                r.getId(), r.getGuesthouseId(), r.getRoomNumber(),
+                r.getId(), r.getGuesthouseId(), r.getOwnerId(), r.getRoomNumber(),
                 r.getType(), r.getPricePerNight(), r.getCapacity(),
                 r.getAmenities(), r.isAvailable(), r.getCreatedAt()
         );

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 public record ProductResponse(
     String id,
+    String ownerId,
     String name,
     String description,
     BigDecimal price,

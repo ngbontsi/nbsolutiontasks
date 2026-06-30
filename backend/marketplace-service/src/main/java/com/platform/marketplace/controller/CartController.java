@@ -15,26 +15,30 @@ public class CartController {
 
     private final CartService cartService;
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<CartResponse> getCart(@PathVariable String userId) {
+    @GetMapping("/my")
+    public ResponseEntity<CartResponse> getMyCart(
+            @RequestHeader("X-User-Id") String userId) {
         return ResponseEntity.ok(cartService.getCart(userId));
     }
 
     @PostMapping
-    public ResponseEntity<CartResponse> addToCart(@Valid @RequestBody CartItemRequest request) {
-        return ResponseEntity.ok(cartService.addToCart(request));
+    public ResponseEntity<CartResponse> addToCart(
+            @Valid @RequestBody CartItemRequest request,
+            @RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok(cartService.addToCart(request, userId));
     }
 
-    @PutMapping("/{userId}/items/{productId}")
+    @PutMapping("/items/{productId}")
     public ResponseEntity<CartResponse> updateCartItem(
-            @PathVariable String userId,
             @PathVariable String productId,
-            @RequestParam int quantity) {
+            @RequestParam int quantity,
+            @RequestHeader("X-User-Id") String userId) {
         return ResponseEntity.ok(cartService.updateCartItem(userId, productId, quantity));
     }
 
-    @DeleteMapping("/{userId}")
-    public ResponseEntity<Void> clearCart(@PathVariable String userId) {
+    @DeleteMapping("/my")
+    public ResponseEntity<Void> clearCart(
+            @RequestHeader("X-User-Id") String userId) {
         cartService.clearCart(userId);
         return ResponseEntity.noContent().build();
     }

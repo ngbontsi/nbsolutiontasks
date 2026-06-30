@@ -35,11 +35,6 @@ spring:
           filters:
             - StripPrefix=2
 
-        - id: task-api
-          uri: ${TASK_API_URI:http://localhost:8085}
-          predicates:
-            - Path=/api/tasks/**
-
       globalcors:
         cors-configurations:
           '[/**]':

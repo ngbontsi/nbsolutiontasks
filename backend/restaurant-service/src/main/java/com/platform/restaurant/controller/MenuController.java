@@ -35,12 +35,14 @@ public class MenuController {
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content)
     })
-    public ResponseEntity<MenuItemResponse> create(@Valid @RequestBody MenuItemRequest request) {
-        return ResponseEntity.ok(menuService.create(request));
+    public ResponseEntity<MenuItemResponse> create(
+            @Valid @RequestBody MenuItemRequest request,
+            @RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok(menuService.create(request, userId));
     }
 
-    @GetMapping("/{restaurantId}")
-    @Operation(summary = "Get all menus", description = "Retrieves a list of all menus by resturantId")
+    @GetMapping("/restaurant/{restaurantId}")
+    @Operation(summary = "Get all menus by restaurant", description = "Retrieves a list of all menus by restaurantId")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully retrieved menus",
                     content = @Content(mediaType = "application/json",
@@ -59,8 +61,11 @@ public class MenuController {
             @ApiResponse(responseCode = "404", description = "Menu not found",
                     content = @Content)
     })
-    public ResponseEntity<MenuItemResponse> getById(@PathVariable String id) {
-        return ResponseEntity.ok(menuService.getById(id));
+    public ResponseEntity<MenuItemResponse> getById(
+            @PathVariable String id,
+            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole) {
+        return ResponseEntity.ok(menuService.getById(id, userId, userRole));
     }
 
     @PutMapping("/{id}")
@@ -74,8 +79,12 @@ public class MenuController {
             @ApiResponse(responseCode = "400", description = "Invalid input",
                     content = @Content)
     })
-    public ResponseEntity<MenuItemResponse> update(@PathVariable String id, @Valid @RequestBody MenuItemRequest request) {
-        return ResponseEntity.ok(menuService.update(id, request));
+    public ResponseEntity<MenuItemResponse> update(
+            @PathVariable String id,
+            @Valid @RequestBody MenuItemRequest request,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Role") String userRole) {
+        return ResponseEntity.ok(menuService.update(id, request, userId, userRole));
     }
 
     @DeleteMapping("/{id}")
@@ -84,8 +93,11 @@ public class MenuController {
             @ApiResponse(responseCode = "204", description = "Menu deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Menu not found")
     })
-    public ResponseEntity<Void> delete(@PathVariable String id) {
-        menuService.delete(id);
+    public ResponseEntity<Void> delete(
+            @PathVariable String id,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Role") String userRole) {
+        menuService.delete(id, userId, userRole);
         return ResponseEntity.noContent().build();
     }
 }

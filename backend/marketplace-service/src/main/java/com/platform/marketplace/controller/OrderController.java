@@ -19,27 +19,38 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request) {
-        return ResponseEntity.ok(orderService.createOrder(request));
+    public ResponseEntity<OrderResponse> createOrder(
+            @Valid @RequestBody OrderRequest request,
+            @RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok(orderService.createOrder(request, userId));
     }
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<OrderResponse>> getUserOrders(@PathVariable String userId) {
+    @GetMapping("/my")
+    public ResponseEntity<List<OrderResponse>> getMyOrders(
+            @RequestHeader("X-User-Id") String userId) {
         return ResponseEntity.ok(orderService.getUserOrders(userId));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponse> getById(@PathVariable String id) {
-        return ResponseEntity.ok(orderService.getById(id));
+    public ResponseEntity<OrderResponse> getById(
+            @PathVariable String id,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole) {
+        return ResponseEntity.ok(orderService.getById(id, userId, userRole));
     }
 
     @GetMapping("/{id}/items")
-    public ResponseEntity<List<OrderItemResponse>> getOrderItems(@PathVariable String id) {
-        return ResponseEntity.ok(orderService.getOrderItems(id));
+    public ResponseEntity<List<OrderItemResponse>> getOrderItems(
+            @PathVariable String id,
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader(value = "X-User-Role", required = false) String userRole) {
+        return ResponseEntity.ok(orderService.getOrderItems(id, userId, userRole));
     }
 
     @PatchMapping("/{id}/status")
-    public ResponseEntity<OrderResponse> updateStatus(@PathVariable String id, @RequestParam String status) {
+    public ResponseEntity<OrderResponse> updateStatus(
+            @PathVariable String id,
+            @RequestParam String status) {
         return ResponseEntity.ok(orderService.updateStatus(id, status));
     }
 }

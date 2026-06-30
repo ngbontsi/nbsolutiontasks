@@ -23,6 +23,9 @@ public class Room {
     @Column(nullable = false)
     private String guesthouseId;
 
+    @Column(name = "owner_id")
+    private String ownerId;
+
     @Column(nullable = false)
     private String roomNumber;
 

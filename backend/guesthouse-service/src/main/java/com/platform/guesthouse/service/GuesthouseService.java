@@ -16,8 +16,9 @@ public class GuesthouseService {
 
     private final GuesthouseRepository guesthouseRepository;
 
-    public GuesthouseResponse create(GuesthouseRequest request) {
+    public GuesthouseResponse create(GuesthouseRequest request, String ownerId) {
         Guesthouse guesthouse = Guesthouse.builder()
+                .ownerId(ownerId)
                 .name(request.name())
                 .description(request.description())
                 .address(request.address())
@@ -28,25 +29,47 @@ public class GuesthouseService {
         return toResponse(guesthouseRepository.save(guesthouse));
     }
 
-    public List<GuesthouseResponse> getAll() {
-        return guesthouseRepository.findAll().stream()
+    public List<GuesthouseResponse> getAll(String userId, String userRole) {
+        if (isAdmin(userRole)) {
+            return guesthouseRepository.findAll().stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
+        List<Guesthouse> guesthouses = (userId != null)
+                ? guesthouseRepository.findByOwnerId(userId)
+                : guesthouseRepository.findAll();
+        return guesthouses.stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public List<GuesthouseResponse> getActive() {
-        return guesthouseRepository.findByActiveTrue().stream()
+    public List<GuesthouseResponse> getActive(String userId, String userRole) {
+        if (isAdmin(userRole)) {
+            return guesthouseRepository.findByActiveTrue().stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
+        List<Guesthouse> guesthouses = (userId != null)
+                ? guesthouseRepository.findByOwnerIdAndActiveTrue(userId)
+                : guesthouseRepository.findByActiveTrue();
+        return guesthouses.stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public GuesthouseResponse getById(String id) {
-        return toResponse(guesthouseRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Guesthouse not found")));
-    }
-
-    public GuesthouseResponse update(String id, GuesthouseRequest request) {
+    public GuesthouseResponse getById(String id, String userId, String userRole) {
         Guesthouse guesthouse = getByIdEntity(id);
+        if (!isAdmin(userRole) && userId != null && !userId.equals(guesthouse.getOwnerId())) {
+            throw new ResourceNotFoundException("Guesthouse not found");
+        }
+        return toResponse(guesthouse);
+    }
+
+    public GuesthouseResponse update(String id, GuesthouseRequest request, String userId, String userRole) {
+        Guesthouse guesthouse = getByIdEntity(id);
+        if (!isAdmin(userRole) && !userId.equals(guesthouse.getOwnerId())) {
+            throw new ResourceNotFoundException("Guesthouse not found");
+        }
         guesthouse.setName(request.name());
         guesthouse.setDescription(request.description());
         guesthouse.setAddress(request.address());
@@ -56,10 +79,17 @@ public class GuesthouseService {
         return toResponse(guesthouseRepository.save(guesthouse));
     }
 
-    public void delete(String id) {
+    public void delete(String id, String userId, String userRole) {
         Guesthouse guesthouse = getByIdEntity(id);
+        if (!isAdmin(userRole) && !userId.equals(guesthouse.getOwnerId())) {
+            throw new ResourceNotFoundException("Guesthouse not found");
+        }
         guesthouse.setActive(false);
         guesthouseRepository.save(guesthouse);
+    }
+
+    private boolean isAdmin(String userRole) {
+        return "ADMIN".equals(userRole);
     }
 
     private Guesthouse getByIdEntity(String id) {
@@ -69,7 +99,7 @@ public class GuesthouseService {
 
     private GuesthouseResponse toResponse(Guesthouse g) {
         return new GuesthouseResponse(
-                g.getId(), g.getName(), g.getDescription(),
+                g.getId(), g.getOwnerId(), g.getName(), g.getDescription(),
                 g.getAddress(), g.getPhone(), g.getImageUrl(),
                 g.getAmenities(), g.isActive(), g.getCreatedAt(), g.getUpdatedAt()
         );

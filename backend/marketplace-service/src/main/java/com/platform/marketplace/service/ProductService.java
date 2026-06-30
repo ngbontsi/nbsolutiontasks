@@ -17,8 +17,9 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public ProductResponse create(ProductRequest request) {
+    public ProductResponse create(ProductRequest request, String ownerId) {
         Product product = Product.builder()
+                .ownerId(ownerId)
                 .name(request.name())
                 .description(request.description())
                 .price(BigDecimal.valueOf(request.price()))
@@ -30,14 +31,30 @@ public class ProductService {
         return toResponse(productRepository.save(product));
     }
 
-    public List<ProductResponse> getAll() {
-        return productRepository.findAll().stream()
+    public List<ProductResponse> getAll(String userId, String userRole) {
+        if (isAdmin(userRole)) {
+            return productRepository.findAll().stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
+        List<Product> products = (userId != null)
+                ? productRepository.findByOwnerId(userId)
+                : productRepository.findAll();
+        return products.stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public List<ProductResponse> getActive() {
-        return productRepository.findByActiveTrue().stream()
+    public List<ProductResponse> getActive(String userId, String userRole) {
+        if (isAdmin(userRole)) {
+            return productRepository.findByActiveTrue().stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
+        List<Product> products = (userId != null)
+                ? productRepository.findByOwnerIdAndActiveTrue(userId)
+                : productRepository.findByActiveTrue();
+        return products.stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -54,13 +71,19 @@ public class ProductService {
                 .toList();
     }
 
-    public ProductResponse getById(String id) {
-        return toResponse(productRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found")));
+    public ProductResponse getById(String id, String userId, String userRole) {
+        Product product = getByIdEntity(id);
+        if (!isAdmin(userRole) && userId != null && !userId.equals(product.getOwnerId())) {
+            throw new ResourceNotFoundException("Product not found");
+        }
+        return toResponse(product);
     }
 
-    public ProductResponse update(String id, ProductRequest request) {
+    public ProductResponse update(String id, ProductRequest request, String userId, String userRole) {
         Product product = getByIdEntity(id);
+        if (!isAdmin(userRole) && !userId.equals(product.getOwnerId())) {
+            throw new ResourceNotFoundException("Product not found");
+        }
         product.setName(request.name());
         product.setDescription(request.description());
         if (request.price() != null) {
@@ -73,8 +96,11 @@ public class ProductService {
         return toResponse(productRepository.save(product));
     }
 
-    public void delete(String id) {
+    public void delete(String id, String userId, String userRole) {
         Product product = getByIdEntity(id);
+        if (!isAdmin(userRole) && !userId.equals(product.getOwnerId())) {
+            throw new ResourceNotFoundException("Product not found");
+        }
         product.setActive(false);
         productRepository.save(product);
     }
@@ -90,9 +116,13 @@ public class ProductService {
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
     }
 
+    private boolean isAdmin(String userRole) {
+        return "ADMIN".equals(userRole);
+    }
+
     private ProductResponse toResponse(Product p) {
         return new ProductResponse(
-                p.getId(), p.getName(), p.getDescription(),
+                p.getId(), p.getOwnerId(), p.getName(), p.getDescription(),
                 p.getPrice(), p.getStockQuantity(), p.getCategoryId(),
                 p.getImageUrl(), p.getBrand(), p.getRating(), p.getReviewCount(),
                 p.isActive(), p.getCreatedAt(), p.getUpdatedAt()

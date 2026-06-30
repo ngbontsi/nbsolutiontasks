@@ -1,5 +1,4 @@
 CREATE DATABASE authdb;
-CREATE DATABASE taskdb;
 CREATE DATABASE restaurantdb;
 CREATE DATABASE guesthousedb;
 CREATE DATABASE marketplacedb;

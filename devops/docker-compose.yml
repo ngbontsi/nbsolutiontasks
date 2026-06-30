@@ -9,7 +9,6 @@ services:
       - RESTAURANT_SERVICE_URI=http://restaurant-service:8082
       - GUESTHOUSE_SERVICE_URI=http://guesthouse-service:8083
       - MARKETPLACE_SERVICE_URI=http://marketplace-service:8084
-      - TASK_API_URI=http://task-api:8085
     depends_on:
       - redis
     networks:
@@ -19,21 +18,6 @@ services:
     build: ../backend/auth-service
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/authdb
-      - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
-      - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-platformpass}
-      - JWT_SECRET=${JWT_SECRET:-change-me-to-a-secure-random-string-at-least-32-chars}
-    depends_on:
-      - db
-    networks:
-      - platform-network
-
-  task-api:
-    build: ../backend/task-api
-    ports:
-      - "8085:8085"
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/taskdb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
       - SPRING_DATASOURCE_PASSWORD=${DB_PASSWORD:-platformpass}
       - JWT_SECRET=${JWT_SECRET:-change-me-to-a-secure-random-string-at-least-32-chars}

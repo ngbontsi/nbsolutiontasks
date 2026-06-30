@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public record GuesthouseResponse(
     String id,
+    String ownerId,
     String name,
     String description,
     String address,

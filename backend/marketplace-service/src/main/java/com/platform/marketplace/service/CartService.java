@@ -32,7 +32,7 @@ public class CartService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (CartItem item : items) {
-            Product product = productService.getById(item.getProductId());
+            Product product = productService.getByIdEntity(item.getProductId());
             BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
             
             itemDetails.add(CartItemDetail.builder()
@@ -54,8 +54,8 @@ public class CartService {
                 .build();
     }
 
-    public CartResponse addToCart(CartItemRequest request) {
-        Cart cart = getOrCreateCart(request.userId());
+    public CartResponse addToCart(CartItemRequest request, String userId) {
+        Cart cart = getOrCreateCart(userId);
         
         CartItem existingItem = cartItemRepository
                 .findByCartIdAndProductId(cart.getId(), request.productId())
@@ -73,7 +73,7 @@ public class CartService {
             cartItemRepository.save(newItem);
         }
 
-        return getCart(request.userId());
+        return getCart(userId);
     }
 
     public CartResponse updateCartItem(String userId, String productId, int quantity) {
