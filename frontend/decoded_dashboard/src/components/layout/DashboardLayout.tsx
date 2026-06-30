@@ -7,6 +7,11 @@ import {
   BarChart3,
   History,
   LogOut,
+  ShoppingBag,
+  Hotel,
+  UtensilsCrossed,
+  ExternalLink,
+  Database,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
@@ -17,6 +22,14 @@ const navItems = [
   { path: "/app/business", label: "Business", icon: Store },
   { path: "/app/analytics", label: "Analytics", icon: BarChart3 },
   { path: "/app/audit", label: "Audit Trail", icon: History },
+  { path: "/app/data", label: "Data", icon: Database },
+];
+
+const externalApps = [
+  { href: "https://ngbontsi.github.io/decodedsolutions/butcher-shop/", label: "Butcher Shop", icon: ShoppingBag },
+  { href: "https://ngbontsi.github.io/decodedsolutions/guesthouse-client/", label: "Guesthouse", icon: Hotel },
+  { href: "https://ngbontsi.github.io/zozos-kitchen/", label: "Zozo's Kitchen", icon: UtensilsCrossed },
+  { href: "https://ngbontsi.github.io/vuyolwethu/", label: "Vuyolwethu", icon: ExternalLink },
 ];
 
 export default function DashboardLayout() {
@@ -43,6 +56,22 @@ export default function DashboardLayout() {
               <item.icon size={20} />
               <span>{item.label}</span>
             </NavLink>
+          ))}
+
+          <div className="sidebar-divider" />
+          <span className="sidebar-section-label">Client Apps</span>
+
+          {externalApps.map((app) => (
+            <a
+              key={app.href}
+              href={app.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="nav-item"
+            >
+              <app.icon size={20} />
+              <span>{app.label}</span>
+            </a>
           ))}
         </nav>
 

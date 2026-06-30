@@ -10,7 +10,10 @@ import MonitoringPage from "./pages/monitoring/MonitoringPage";
 import BusinessPage from "./pages/business/BusinessPage";
 import AnalyticsPage from "./pages/analytics/AnalyticsPage";
 import AuditPage from "./pages/audit/AuditPage";
+import DataPage from "./pages/data/DataPage";
+import EntityDataPage from "./pages/data/EntityDataPage";
 import "./styles/dashboard.css";
+import "./styles/data.css";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuth();
@@ -34,6 +37,8 @@ function AppRoutes() {
         <Route path="business" element={<BusinessPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
         <Route path="audit" element={<AuditPage />} />
+        <Route path="data" element={<DataPage />} />
+        <Route path="data/:entityKey" element={<EntityDataPage />} />
       </Route>
       <Route path="*" element={<LandingPage />} />
     </Routes>

@@ -1,11 +1,6 @@
 declare module 'lucide-react' {
-  import { FC } from 'react';
-  interface IconProps {
-    size?: number | string;
-    color?: string;
-    strokeWidth?: number | string;
-    className?: string;
-  }
+  import type { FC, SVGProps } from 'react';
+  type IconProps = { size?: number | string; color?: string; strokeWidth?: number | string; className?: string } & SVGProps<SVGSVGElement>;
   export const LayoutDashboard: FC<IconProps>;
   export const Users: FC<IconProps>;
   export const Activity: FC<IconProps>;
@@ -26,4 +21,16 @@ declare module 'lucide-react' {
   export const ExternalLink: FC<IconProps>;
   export const ChevronLeft: FC<IconProps>;
   export const ChevronRight: FC<IconProps>;
+  export const History: FC<IconProps>;
+  export const ShoppingBag: FC<IconProps>;
+  export const Hotel: FC<IconProps>;
+  export const UtensilsCrossed: FC<IconProps>;
+  export const UserPlus: FC<IconProps>;
+  export const Shield: FC<IconProps>;
+  export const Trash2: FC<IconProps>;
+  export const X: FC<IconProps>;
+  export const Database: FC<IconProps>;
+  export const Plus: FC<IconProps>;
+  export const ChevronRight: FC<IconProps>;
+  export type LucideIcon = FC<IconProps>;
 }

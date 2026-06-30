@@ -50,8 +50,6 @@ export default function UsersPage() {
 
   const isAdmin = currentUser?.role === "ADMIN";
 
-  const selectedRole = roles.find((r) => r.name === editRole);
-
   const openEdit = (u: User) => {
     setEditUser(u);
     setEditRole(u.role);
