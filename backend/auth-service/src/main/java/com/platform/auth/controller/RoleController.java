@@ -4,6 +4,8 @@ import com.platform.auth.dto.RoleRequest;
 import com.platform.auth.dto.RoleResponse;
 import com.platform.auth.model.Role;
 import com.platform.auth.repository.RoleRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,11 +16,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/auth/roles")
 @RequiredArgsConstructor
+@Tag(name = "Roles", description = "Role management endpoints")
 public class RoleController {
 
     private final RoleRepository roleRepository;
 
     @GetMapping
+    @Operation(summary = "Get all roles", description = "Retrieves all platform roles")
     public ResponseEntity<List<RoleResponse>> getAll() {
         return roleRepository.findAll().stream()
                 .map(r -> new RoleResponse(r.getId(), r.getName(), r.getDescription(),
@@ -28,6 +32,7 @@ public class RoleController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a role", description = "Creates a new platform role")
     public ResponseEntity<RoleResponse> create(@Valid @RequestBody RoleRequest request) {
         if (roleRepository.existsByName(request.name().toUpperCase())) {
             return ResponseEntity.badRequest().build();
@@ -41,6 +46,7 @@ public class RoleController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update a role", description = "Updates an existing role by its ID")
     public ResponseEntity<RoleResponse> update(@PathVariable String id, @Valid @RequestBody RoleRequest request) {
         Role role = roleRepository.findById(id).orElse(null);
         if (role == null) return ResponseEntity.notFound().build();
@@ -55,6 +61,7 @@ public class RoleController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a role", description = "Deletes a role by its ID")
     public ResponseEntity<Void> delete(@PathVariable String id) {
         roleRepository.deleteById(id);
         return ResponseEntity.noContent().build();

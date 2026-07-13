@@ -10,6 +10,10 @@
 
 ## Progress
 ### Done
+- Added Swagger/OpenAPI annotations (`@Tag`, `@Operation`, `@ApiResponses`) to all 11 controllers across 4 services (auth: AuthController, AuditController, RoleController; restaurant: RestaurantController; guesthouse: GuesthouseController, RoomController, ReservationController; marketplace: ProductController, CartController, OrderController, CategoryController)
+- Each controller has `@Tag` at class level, `@Operation(summary=..., description=...)` on each method, and `@ApiResponses` documenting response codes with `@Schema` references to DTOs
+- All 4 services return valid OpenAPI JSON at `/v3/api-docs` (verified inside Docker containers)
+- Swagger UI available at `http://localhost:8080/swagger-ui.html` (via gateway) — each service's springdoc auto-configures without explicit SecurityConfig overrides
 - Replaced hardcoded JWT/DB secrets with `${ENV_VAR}` references, created `.env.example`
 - Restructured monorepo into `backend/`, `frontend/`, `devops/`
 - Built internal admin dashboard (`decoded_dashboard`) with React/Vite, deployed to `https://ngbontsi.github.io/decodedsolutions/dashboard/`
@@ -122,5 +126,5 @@
 - `backend/*/src/main/java/**/config/RlsAspect.java`: AOP aspect setting PostgreSQL session params
 - `backend/*/pom.xml`: Now includes `spring-boot-starter-aop`
 - `backend/*/src/main/java/**/service/*.java`: All services enforce RLS via ownerId checks
-- `backend/*/src/main/java/**/controller/*.java`: Controllers read X-User-Id/X-User-Role headers
+- `backend/*/src/main/java/**/controller/*.java`: Controllers read X-User-Id/X-User-Role headers; all 11 now annotated with Swagger `@Tag`/`@Operation`/`@ApiResponses`
 - `OFFLINE.md`: Complete offline reference including RLS documentation
