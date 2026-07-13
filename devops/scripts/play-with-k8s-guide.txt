@@ -20,7 +20,7 @@ kubectl config view --raw
 # STEP 8: Encode and set secret:
 # -------------------------------------------------
 $ghPath = "C:\Program Files\GitHub CLI\gh.exe"
-$Repo = "ngbontsi/task-api"
+$Repo = "YOUR_GITHUB_REPO"
 
 # Paste your kubeconfig content here (between the quotes)
 $kubeconfigContent = @"

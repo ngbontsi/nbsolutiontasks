@@ -14,11 +14,16 @@ import DataPage from "./pages/data/DataPage";
 import EntityDataPage from "./pages/data/EntityDataPage";
 import "./styles/dashboard.css";
 import "./styles/data.css";
+import type { UserRole } from "./types";
 
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth();
+function ProtectedRoute({ children, allowedRoles }: { children: React.ReactNode; allowedRoles?: UserRole[] }) {
+  const { isAuthenticated, isLoading, user } = useAuth();
   if (isLoading) return null;
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (allowedRoles && user && !allowedRoles.includes(user.role as UserRole)) {
+    return <Navigate to="/app" replace />;
+  }
+  return <>{children}</>;
 }
 
 function AppRoutes() {
@@ -32,11 +37,11 @@ function AppRoutes() {
       <Route path="/register" element={isAuthenticated ? <Navigate to="/app" replace /> : <RegisterPage />} />
       <Route path="/app" element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>
         <Route index element={<DashboardPage />} />
-        <Route path="users" element={<UsersPage />} />
-        <Route path="monitoring" element={<MonitoringPage />} />
+        <Route path="users" element={<ProtectedRoute allowedRoles={["ADMIN"]}><UsersPage /></ProtectedRoute>} />
+        <Route path="monitoring" element={<ProtectedRoute allowedRoles={["ADMIN"]}><MonitoringPage /></ProtectedRoute>} />
         <Route path="business" element={<BusinessPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
-        <Route path="audit" element={<AuditPage />} />
+        <Route path="audit" element={<ProtectedRoute allowedRoles={["ADMIN"]}><AuditPage /></ProtectedRoute>} />
         <Route path="data" element={<DataPage />} />
         <Route path="data/:entityKey" element={<EntityDataPage />} />
       </Route>

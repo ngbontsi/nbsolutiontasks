@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Plus, Edit2, Trash2, Search, X, ChevronLeft } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 import api from "../../services/api";
 import { getEntityConfig, type EntityConfig, type FieldDef } from "../../config/entityConfigs";
 
@@ -22,6 +23,8 @@ export default function EntityDataPage() {
 }
 
 function EntityManager({ config, onBack }: { config: EntityConfig; onBack: () => void }) {
+  const { user } = useAuth();
+  const canModify = user?.role === "ADMIN" || ["RESTAURANT_OWNER", "GUESTHOUSE_OWNER", "MARKETPLACE_VENDOR"].includes(user?.role ?? "");
   const [items, setItems] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -109,7 +112,7 @@ function EntityManager({ config, onBack }: { config: EntityConfig; onBack: () =>
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
-        <button className="btn btn-primary" onClick={() => { setEditItem(null); setShowForm(true); }}>
+        <button className="btn btn-primary" onClick={() => { setEditItem(null); setShowForm(true); }} style={canModify ? {} : { display: 'none' }}>
           <Plus size={16} /> Add {config.label}
         </button>
       </div>
@@ -129,7 +132,7 @@ function EntityManager({ config, onBack }: { config: EntityConfig; onBack: () =>
                   {visibleFields.map((f) => (
                     <th key={f.name} style={f.width ? { width: f.width } : undefined}>{f.label}</th>
                   ))}
-                  <th style={{ width: 80 }}>Actions</th>
+                  {canModify && <th style={{ width: 80 }}>Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -150,12 +153,16 @@ function EntityManager({ config, onBack }: { config: EntityConfig; onBack: () =>
                     ))}
                     <td>
                       <div className="actions">
-                        <button className="btn-icon" title="Edit" onClick={() => { setEditItem(item); setShowForm(true); }}>
-                          <Edit2 size={14} />
-                        </button>
-                        <button className="btn-icon btn-icon-danger" title="Delete" onClick={() => setDeleteItem(item)}>
-                          <Trash2 size={14} />
-                        </button>
+                        {canModify && (
+                          <>
+                            <button className="btn-icon" title="Edit" onClick={() => { setEditItem(item); setShowForm(true); }}>
+                              <Edit2 size={14} />
+                            </button>
+                            <button className="btn-icon btn-icon-danger" title="Delete" onClick={() => setDeleteItem(item)}>
+                              <Trash2 size={14} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

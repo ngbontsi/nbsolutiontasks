@@ -15,14 +15,14 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const navItems = [
-  { path: "/app", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/app/users", label: "Users", icon: Users },
-  { path: "/app/monitoring", label: "Monitoring", icon: Activity },
-  { path: "/app/business", label: "Business", icon: Store },
-  { path: "/app/analytics", label: "Analytics", icon: BarChart3 },
-  { path: "/app/audit", label: "Audit Trail", icon: History },
-  { path: "/app/data", label: "Data", icon: Database },
+const allNavItems = [
+  { path: "/app", label: "Dashboard", icon: LayoutDashboard, roles: ["ADMIN", "USER", "RESTAURANT_OWNER", "GUESTHOUSE_OWNER", "MARKETPLACE_VENDOR", "SUPERVISOR", "MANAGER"] },
+  { path: "/app/users", label: "Users", icon: Users, roles: ["ADMIN"] },
+  { path: "/app/monitoring", label: "Monitoring", icon: Activity, roles: ["ADMIN"] },
+  { path: "/app/business", label: "Business", icon: Store, roles: ["ADMIN", "RESTAURANT_OWNER", "GUESTHOUSE_OWNER", "MARKETPLACE_VENDOR", "MANAGER"] },
+  { path: "/app/analytics", label: "Analytics", icon: BarChart3, roles: ["ADMIN", "USER", "RESTAURANT_OWNER", "GUESTHOUSE_OWNER", "MARKETPLACE_VENDOR", "SUPERVISOR", "MANAGER"] },
+  { path: "/app/audit", label: "Audit Trail", icon: History, roles: ["ADMIN"] },
+  { path: "/app/data", label: "Data", icon: Database, roles: ["ADMIN", "USER", "RESTAURANT_OWNER", "GUESTHOUSE_OWNER", "MARKETPLACE_VENDOR", "SUPERVISOR", "MANAGER"] },
 ];
 
 const externalApps = [
@@ -34,6 +34,11 @@ const externalApps = [
 
 export default function DashboardLayout() {
   const { user, logout } = useAuth();
+  const userRole = (user?.role ?? "USER") as string;
+
+  const navItems = allNavItems.filter(
+    (item) => item.roles.includes(userRole)
+  );
 
   return (
     <div className="app-layout">
@@ -79,7 +84,7 @@ export default function DashboardLayout() {
           {user && (
             <div className="sidebar-user">
               <span className="user-name">{user.firstName} {user.lastName}</span>
-              <span className="user-role">{user.role}</span>
+              <span className="user-role">{user.role.replace(/_/g, " ")}</span>
             </div>
           )}
           <button className="nav-item logout" onClick={logout}>

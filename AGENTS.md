@@ -45,19 +45,25 @@
 | **butcher-shop** | `src/data/products.ts` (static import) | No — 100% mock |
 | **guesthouse-client** | `src/data/properties.ts` (static import) | No — 100% mock |
 | **decoded_dashboard** | Inline mock data per page | No — 100% mock |
-| **task_app** (Flutter) | HTTP calls to localhost:8080 | Yes — real API |
+
 
 ### In Progress
 - Butcher shop needs real product content populated from user's hard-copy documents
 - User to provide product data via voice-to-text or spreadsheet template
 
-### Done (RLS Implementation)
-- Deleted task-api from source, docker-compose, gateway routes, and DB init
-- Added ownerId to Restaurant, MenuItem, Guesthouse, Room, Product entities
-- Updated DTOs, repos, controllers, services for ownership enforcement
-- Admin bypass via X-User-Role header (ADMIN sees all data)
-- Built and injected JARs into all 4 running containers
-- Verified RLS end-to-end across all 3 services
+### Done (PostgreSQL Native RLS)
+- Created `devops/db/rls/setup_rls.sql` — PostgreSQL Row-Level Security policies for all 4 databases
+  - Every table gets: `admin_all` (ADMIN bypass) + `user_own` (scoped to `owner_id` or `user_id`)
+  - Categories table: `public_read` for shared reference data
+  - Cart items / Order items: subquery-based RLS via parent cart/order
+  - Child entities (cart_items, order_items): RLS via `EXISTS` subquery against parent
+- Created `UserContext.java` (ThreadLocal) + `UserContextFilter.java` (reads `X-User-Id`/`X-User-Role` headers) in all 4 services
+- Created `RlsAspect.java` — AOP `@Before` advice on all repository methods, calls `SELECT set_config('app.current_user_id', ...)` to set PostgreSQL session parameters before every query
+- Added `spring-boot-starter-aop` to all 4 service pom.xml files
+- Frontend: Added role-based route guards (`App.tsx` — `ProtectedRoute` with `allowedRoles`)
+- Frontend: Sidebar now filters nav items by user role (Admin sees all; others see subset)
+- Frontend: `EntityDataPage.tsx` hides Add/Edit/Delete buttons for non-privileged roles
+- Frontend: Created `hooks/useAuthorization.ts` — reusable role-checking hook
 
 ### Blocked
 - (none)
@@ -70,7 +76,10 @@
 - All deployment automated via `deploy.ps1`/`deploy.sh` to avoid manual branch switching
 - Dockerfiles updated to Java 21 to match pom.xml target
 - Secrets externalized to env vars with sensible defaults in application.yml
-- **RLS approach**: Application-level Row-Level Security via `ownerId` fields + `X-User-Id`/`X-User-Role` header enforcement. ADMIN role bypasses ownership checks. task-api deleted (was reference RLS implementation).
+- **Dual-layer RLS**: PostgreSQL native RLS (database-level via `set_config` + policies) + application-level `ownerId` checks (redundant defence). PostgreSQL RLS is primary; app-level is fallback.
+- **RLS session propagation**: AOP aspect calls `set_config()` before every `repository.*()` call. `SET` is session-scoped and transaction-safe via `true` (local) parameter.
+- **Admin bypass**: Separate PostgreSQL policy `admin_all` checks `app.current_user_role = 'ADMIN'` — admins bypass all ownership restrictions at the database level.
+- **Frontend role gating**: Three-tier: (1) Route-level guard → (2) Nav filter → (3) Button-level hide. Backend RLS is the real authority; frontend gating is UX only.
 - **JAR inject workflow**: Build with WSL `mvn` → `docker cp` → restart, avoids full image rebuild for fast iteration.
 
 ## Next Steps
@@ -78,31 +87,40 @@
 - Update products.ts with real products, prices, categories, images
 - Rebuild and deploy via `.\deploy.ps1`
 - Change `decodedsolutionsite` Pages source from `master` to `gh-pages` in repo settings
+- Run RLS SQL against production databases (`psql -f devops/db/rls/setup_rls.sql`)
 - (Future) Wire frontend demos to real Spring Boot backend APIs when ready
 
 ## Critical Context
 - Backend: 5 Spring Boot microservices (api-gateway, auth, guesthouse, marketplace, restaurant) with Docker configs — **backend running on localhost:8080-8084**
 - Auth-service has Keycloak dependency but no Keycloak docker-compose or config found
 - Guesthouse-service missing `application.yml` (was deleted/recreated)
-- `frontend/task_app/` is a Flutter project — only app with real API integration (Flutter SDK not installed)
 - WSL mount: `/mnt/c/Users/admin/Desktop/decoded\ solution\ platform/platform/`
 - `.git/index.lock` may stall git operations; delete with `Remove-Item -Force .git/index.lock`
 - gh-pages currently serves: static landing page (root), butcher-shop/, guesthouse-client/, dashboard/
-- RLS enforced via `X-User-Id`/`X-User-Role` headers; ADMIN bypasses ownership checks
+- **RLS Dual Layer**: PostgreSQL native (policy + set_config) + Application-level (ownerId checks in services/controllers). Apply RLS SQL with `psql -f devops/db/rls/setup_rls.sql`.
+- **Backend AOP flow**: HTTP request → `UserContextFilter` reads headers → sets ThreadLocal → `RlsAspect` calls `set_config()` before each repository call → PostgreSQL RLS policies evaluate → data returned
 
 ## Relevant Files
 - `devops/docker-compose.yml`: Updated build paths & env vars for secrets
+- `devops/db/rls/setup_rls.sql`: PostgreSQL native RLS for all 4 databases (admin bypass + ownership scoping)
 - `.env.example`: Template for `JWT_SECRET`, `DB_USERNAME`, `DB_PASSWORD`
 - `frontend/decoded_dashboard/`: Admin dashboard (React/Vite/HashRouter, deployed `/dashboard/`)
+- `frontend/decoded_dashboard/src/App.tsx`: Role-based route guards with `ProtectedRoute`
+- `frontend/decoded_dashboard/src/hooks/useAuthorization.ts`: Reusable role-checking hook
+- `frontend/decoded_dashboard/src/components/layout/DashboardLayout.tsx`: Role-filtered navigation
+- `frontend/decoded_dashboard/src/pages/data/EntityDataPage.tsx`: Role-based CRUD button visibility
 - `frontend/butcher-shop/`: Butcher e-commerce demo (cart/wishlist/checkout, deployed `/butcher-shop/`)
 - `frontend/butcher-shop/src/data/products.ts`: Mock product data — needs real content
 - `frontend/butcher-shop/src/types/index.ts`: `Product` and `CartItem` types
 - `frontend/guesthouse-client/`: Guesthouse booking demo (rooms/dates/bookings, deployed `/guesthouse-client/`)
 - `business Processes/website/`: Marketing site (separate repo `ngbontsi/decodedsolutionsite`)
 - `deploy.ps1` / `deploy.sh`: Unified deployment scripts in platform root
-- `backend/*/Dockerfile`: Now all using `eclipse-temurin:21-jdk-alpine` / `21-jre-alpine`
-- `backend/*/src/main/resources/application.yml`: Secrets now use `${ENV_VAR:default}` pattern
-- `frontend/task_app/`: Flutter mobile app (only app with real API integration)
-- `backend/*/src/main/java/**/service/*.java`: All services now enforce RLS via ownerId checks
+- `backend/*/Dockerfile`: All using `eclipse-temurin:21-jdk-alpine` / `21-jre-alpine`
+- `backend/*/src/main/resources/application.yml`: Secrets use `${ENV_VAR:default}` pattern
+- `backend/*/src/main/java/**/config/UserContext.java`: ThreadLocal holder (userId, userRole, userEmail)
+- `backend/*/src/main/java/**/config/UserContextFilter.java`: Servlet Filter reading X-User-* headers
+- `backend/*/src/main/java/**/config/RlsAspect.java`: AOP aspect setting PostgreSQL session params
+- `backend/*/pom.xml`: Now includes `spring-boot-starter-aop`
+- `backend/*/src/main/java/**/service/*.java`: All services enforce RLS via ownerId checks
 - `backend/*/src/main/java/**/controller/*.java`: Controllers read X-User-Id/X-User-Role headers
 - `OFFLINE.md`: Complete offline reference including RLS documentation
