@@ -16,6 +16,8 @@ services:
 
   auth-service:
     build: ../backend/auth-service
+    ports:
+      - "8081:8081"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/authdb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
@@ -28,6 +30,8 @@ services:
 
   restaurant-service:
     build: ../backend/restaurant-service
+    ports:
+      - "8082:8082"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/restaurantdb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
@@ -39,6 +43,8 @@ services:
 
   guesthouse-service:
     build: ../backend/guesthouse-service
+    ports:
+      - "8083:8083"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/guesthousedb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}
@@ -50,6 +56,8 @@ services:
 
   marketplace-service:
     build: ../backend/marketplace-service
+    ports:
+      - "8084:8084"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/marketplacedb
       - SPRING_DATASOURCE_USERNAME=${DB_USERNAME:-platformuser}

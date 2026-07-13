@@ -24,6 +24,14 @@ CREATE POLICY user_self ON users
     USING (id = current_setting('app.current_user_id', true))
     WITH CHECK (id = current_setting('app.current_user_id', true));
 
+DROP POLICY IF EXISTS public_read ON users;
+CREATE POLICY public_read ON users
+    FOR SELECT
+    USING (
+        current_setting('app.current_user_role', true) = ''
+        AND current_setting('app.current_user_id', true) = ''
+    );
+
 -- Audit logs table
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 

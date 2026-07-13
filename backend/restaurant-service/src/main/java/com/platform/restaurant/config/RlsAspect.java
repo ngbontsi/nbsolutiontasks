@@ -20,15 +20,11 @@ public class RlsAspect {
         String userId = UserContext.getUserId();
         String userRole = UserContext.getUserRole();
 
-        if (userId != null) {
-            entityManager.createNativeQuery("SELECT set_config('app.current_user_id', ?1, true)")
-                .setParameter(1, userId)
-                .getSingleResult();
-        }
-        if (userRole != null) {
-            entityManager.createNativeQuery("SELECT set_config('app.current_user_role', ?1, true)")
-                .setParameter(1, userRole)
-                .getSingleResult();
-        }
+        entityManager.createNativeQuery("SELECT set_config('app.current_user_id', ?1, true)")
+            .setParameter(1, userId != null ? userId : "")
+            .getSingleResult();
+        entityManager.createNativeQuery("SELECT set_config('app.current_user_role', ?1, true)")
+            .setParameter(1, userRole != null ? userRole : "")
+            .getSingleResult();
     }
 }
