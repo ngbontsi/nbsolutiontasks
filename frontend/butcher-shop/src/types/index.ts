@@ -1,13 +1,16 @@
 export interface Product {
-  id: number;
+  id: string;
   name: string;
-  category: 'beef' | 'lamb' | 'chicken' | 'pork' | 'specials';
+  category: string;
   price: number;
   unit: string;
   image: string;
   description: string;
   inStock: boolean;
   featured: boolean;
+  brand?: string;
+  rating?: number;
+  reviewCount?: number;
 }
 
 export interface CartItem {
@@ -15,4 +18,4 @@ export interface CartItem {
   quantity: number;
 }
 
-export type Category = Product['category'];
+export type CategoryName = string;

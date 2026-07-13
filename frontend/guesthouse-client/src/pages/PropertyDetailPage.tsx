@@ -35,7 +35,7 @@ const amenityIcons: Record<string, React.ReactNode> = {
 export default function PropertyDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { properties } = useBooking();
+  const { properties, addBooking, isAuthenticated } = useBooking();
   const property = properties.find((p) => p.id === id);
 
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
@@ -43,6 +43,7 @@ export default function PropertyDetailPage() {
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
   const [bookingStep, setBookingStep] = useState(0);
+  const [bookingError, setBookingError] = useState("");
 
   if (!property) {
     return (
@@ -74,7 +75,23 @@ export default function PropertyDetailPage() {
     setBookingStep(1);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (!isAuthenticated) {
+      setBookingError("Please sign in to book");
+      return;
+    }
+    if (!selectedRoom || !checkIn || !checkOut) return;
+    setBookingError("");
+    await addBooking({
+      propertyId: property.id,
+      propertyName: property.name,
+      roomId: selectedRoom.id,
+      roomName: selectedRoom.name,
+      checkIn,
+      checkOut,
+      guests,
+      total,
+    });
     navigate("/my-bookings");
   };
 
@@ -211,6 +228,7 @@ export default function PropertyDetailPage() {
         <div className="booking-modal">
           <div className="booking-modal-content">
             <h2>Booking Summary</h2>
+            {bookingError && <div className="error-banner">{bookingError}</div>}
             <div className="booking-details">
               <div className="booking-detail-row">
                 <span>Property</span>

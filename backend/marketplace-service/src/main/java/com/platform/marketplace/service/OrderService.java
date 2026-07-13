@@ -54,6 +54,13 @@ public class OrderService {
 
             BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity()));
             totalAmount = totalAmount.add(subtotal);
+        }
+
+        order.setTotalAmount(totalAmount);
+        order = orderRepository.save(order);
+
+        for (CartItem cartItem : cartItems) {
+            Product product = productService.getByIdEntity(cartItem.getProductId());
 
             OrderItem orderItem = OrderItem.builder()
                     .orderId(order.getId())
@@ -61,15 +68,12 @@ public class OrderService {
                     .productName(product.getName())
                     .quantity(cartItem.getQuantity())
                     .price(product.getPrice())
-                    .subtotal(subtotal)
+                    .subtotal(product.getPrice().multiply(BigDecimal.valueOf(cartItem.getQuantity())))
                     .build();
             
             orderItemRepository.save(orderItem);
             productService.updateStock(product.getId(), cartItem.getQuantity());
         }
-
-        order.setTotalAmount(totalAmount);
-        order = orderRepository.save(order);
 
         cartItemRepository.deleteByCartId(cart.getId());
 

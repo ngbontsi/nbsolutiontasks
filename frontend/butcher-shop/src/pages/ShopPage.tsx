@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { ShoppingBag, Heart } from "lucide-react";
 import { useShop } from "../context/ShopContext";
-import type { Category } from "../types";
 
 export default function ShopPage() {
   const [searchParams] = useSearchParams();
   const { products, addToCart, toggleWishlist, isInWishlist } = useShop();
-  const [activeCategory, setActiveCategory] = useState<Category | "all">(
-    (searchParams.get("category") as Category) || "all",
-  );
+  const [activeCategory, setActiveCategory] = useState<string>("all");
 
-  const categories: { key: Category | "all"; label: string }[] = [
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat) setActiveCategory(cat);
+  }, [searchParams]);
+
+  const categories: { key: string; label: string }[] = [
     { key: "all", label: "All" },
     { key: "beef", label: "Beef" },
     { key: "lamb", label: "Lamb" },
