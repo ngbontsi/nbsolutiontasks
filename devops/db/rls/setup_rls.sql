@@ -98,6 +98,11 @@ CREATE POLICY user_own ON guesthouses
     USING (owner_id = current_setting('app.current_user_id', true))
     WITH CHECK (owner_id = current_setting('app.current_user_id', true));
 
+DROP POLICY IF EXISTS public_read ON guesthouses;
+CREATE POLICY public_read ON guesthouses
+    FOR SELECT
+    USING (true);
+
 -- Rooms table
 ALTER TABLE rooms ENABLE ROW LEVEL SECURITY;
 
@@ -112,6 +117,11 @@ CREATE POLICY user_own ON rooms
     FOR ALL
     USING (owner_id = current_setting('app.current_user_id', true))
     WITH CHECK (owner_id = current_setting('app.current_user_id', true));
+
+DROP POLICY IF EXISTS public_read ON rooms;
+CREATE POLICY public_read ON rooms
+    FOR SELECT
+    USING (true);
 
 -- Reservations table
 ALTER TABLE reservations ENABLE ROW LEVEL SECURITY;
@@ -145,6 +155,11 @@ CREATE POLICY user_own ON products
     FOR ALL
     USING (owner_id = current_setting('app.current_user_id', true))
     WITH CHECK (owner_id = current_setting('app.current_user_id', true));
+
+DROP POLICY IF EXISTS public_read ON products;
+CREATE POLICY public_read ON products
+    FOR SELECT
+    USING (true);
 
 -- Categories (shared reference data - publicly readable)
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;

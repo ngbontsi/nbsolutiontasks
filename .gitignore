@@ -51,6 +51,14 @@ frontend/butcher-shop/dist/
 # Guesthouse Client
 frontend/guesthouse-client/node_modules/
 frontend/guesthouse-client/dist/
+
+# Zozo's Shop
+frontend/zozos-shop/node_modules/
+frontend/zozos-shop/dist/
+
+# TypeScript build info
+*.tsbuildinfo
+
 OFFLINE.md
 AGENTS.md
 
