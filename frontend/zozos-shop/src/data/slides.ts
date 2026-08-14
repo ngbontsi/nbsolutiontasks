@@ -1,3 +1,7 @@
+import zozoShop from '../assets/slides/ZozoShop.jpeg'
+import zozoShop1 from '../assets/slides/ZozoShop1.jpeg'
+import zozoShop2 from '../assets/slides/ZozoShop2.jpeg'
+
 export interface Slide {
   image: string
   title: string
@@ -6,17 +10,17 @@ export interface Slide {
 
 export const slides: Slide[] = [
   {
-    image: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=1200",
+    image: zozoShop,
     title: "Welcome to Zozo's Kitchen",
     subtitle: "Homemade meals made with love",
   },
   {
-    image: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1200",
+    image: zozoShop1,
     title: "Fresh Ingredients Daily",
     subtitle: "Quality you can taste",
   },
   {
-    image: "https://images.unsplash.com/photo-1551218808-94e220e084d2?w=1200",
+    image: zozoShop2,
     title: "Family Recipes",
     subtitle: "Generations of flavour",
   },

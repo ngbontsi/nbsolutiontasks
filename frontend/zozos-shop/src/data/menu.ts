@@ -1,3 +1,8 @@
+import zozoShop3 from '../assets/menus/ZozoShop3.jpeg'
+import zozoShop4 from '../assets/menus/ZozoShop4.jpeg'
+import zozoShop5 from '../assets/menus/ZozoShop5.jpeg'
+import zozoShop7 from '../assets/menus/ZozoShop7.jpeg'
+
 export interface MenuItem {
   name: string
   description: string
@@ -10,25 +15,25 @@ export const todayMenu: MenuItem[] = [
     name: "Grilled Chicken & Rice",
     description: "Tender grilled chicken with seasoned rice and fresh vegetables",
     price: "R85",
-    image: "https://images.unsplash.com/photo-1598103442097-8b74394b95c6?w=600",
+    image: zozoShop3,
   },
   {
     name: "Beef Stew & Pap",
     description: "Slow-cooked beef stew served with creamy pap and gravy",
     price: "R90",
-    image: "https://images.unsplash.com/photo-1544025162-d76694265947?w=600",
+    image: zozoShop4,
   },
   {
     name: "Veggie Stir Fry",
     description: "Fresh seasonal vegetables wok-fried with noodles",
     price: "R65",
-    image: "https://images.unsplash.com/photo-1512058564366-18510be2db19?w=600",
+    image: zozoShop5,
   },
   {
     name: "Fried Fish & Chips",
     description: "Crispy fried fish fillet with golden chips and tartar sauce",
     price: "R80",
-    image: "https://images.unsplash.com/photo-1579208030886-b2da2d67d7bc?w=600",
+    image: zozoShop7,
   },
 ]
 
