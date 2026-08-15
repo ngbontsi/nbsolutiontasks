@@ -4,6 +4,8 @@
 #   - decoded-auth / decoded-api-gateway:  JWT_SECRET (same strong value on both)
 #   - decoded-auth / restaurant / guesthouse / marketplace:  DB_PASSWORD
 #   - decoded-api-gateway:  REDIS_HOST (internal hostname from the decoded-redis Key Value "Connect" tab)
+# Note: Render's Blueprint spec has no keyvalue resource — decoded-redis is created manually in the dashboard
+#   (New → Key Value → name "decoded-redis", plan free), then its internal hostname goes into REDIS_HOST above.
 
 databases: []
 
@@ -87,7 +89,3 @@ services:
         value: "6379"
       - key: JWT_SECRET
         sync: false
-
-keyvalue:
-  - name: decoded-redis
-    plan: free
