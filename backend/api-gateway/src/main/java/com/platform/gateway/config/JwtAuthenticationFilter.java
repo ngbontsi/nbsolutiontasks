@@ -24,19 +24,19 @@ import java.util.List;
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth/login",
-            "/api/auth/register",
-            "/api/auth/refresh"
+            "/auth/login",
+            "/auth/register",
+            "/auth/refresh"
     );
 
     private static final List<String> PUBLIC_GET_PREFIXES = List.of(
-            "/api/marketplace/products",
-            "/api/marketplace/categories",
-            "/api/guesthouse/guesthouses",
-            "/api/guesthouse/rooms"
+            "/products",
+            "/categories",
+            "/guesthouses",
+            "/rooms"
     );
 
-    private static final String LOGOUT_PATH = "/api/auth/logout";
+    private static final String LOGOUT_PATH = "/auth/logout";
 
     @Value("${jwt.secret}")
     private String jwtSecret;
@@ -138,6 +138,6 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return -100;
+        return 100;
     }
 }
