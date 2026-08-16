@@ -80,10 +80,16 @@ export default function LandingPage() {
         </div>
         <div className="founder-info">
           <h2>Ndimphiwe Bontsi</h2>
-          <p className="founder-title">Founder & Full-Stack Developer</p>
+          <p className="founder-title">Senior Software Engineer & Cloud Architect</p>
           <p className="founder-bio">
-            Building digital solutions that bridge the gap between local businesses and modern technology.
-            Specializing in Spring Boot microservices, React frontends, and cloud-native deployments.
+            Highly accomplished Senior Software Engineer with over 13 years of enterprise-level expertise
+            designing, building, and scaling robust full-stack applications across Banking, Telecom, Fintech,
+            and Enterprise environments. Proven track record of architecting distributed microservices
+            utilizing Java (up to v21), Spring Boot, Quarkus, and cloud-native ecosystems (AWS, Docker,
+            Kubernetes). Specialized in leading high-velocity engineering teams, modernizing legacy
+            systems, and driving cost-effective open-source architecture. An autonomous, strategic
+            professional adept at aligning deep technical logic with complex business requirements to
+            deliver secure, high-value production systems globally.
           </p>
           <div className="landing-actions">
             <button className="landing-btn landing-btn-primary" onClick={() => navigate('/login')}>
