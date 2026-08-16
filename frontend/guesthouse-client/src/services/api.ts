@@ -12,7 +12,15 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (res) => res,
-  (err) => {
+  async (err) => {
+    const config = err.config as
+      | (import('axios').InternalAxiosRequestConfig & { _retry?: boolean })
+      | undefined;
+    if (err.response?.status === 429 && config && !config._retry) {
+      config._retry = true;
+      await new Promise((r) => setTimeout(r, 2000));
+      return api(config);
+    }
     if (err.response?.status === 401) {
       localStorage.removeItem('gh_token');
       localStorage.removeItem('gh_user');

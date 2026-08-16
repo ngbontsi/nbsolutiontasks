@@ -16,7 +16,15 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
+    const config = error.config as
+      | (import('axios').InternalAxiosRequestConfig & { _retry?: boolean })
+      | undefined;
+    if (error.response?.status === 429 && config && !config._retry) {
+      config._retry = true;
+      await new Promise((r) => setTimeout(r, 2000));
+      return api(config);
+    }
     if (error.response?.status === 401) {
       localStorage.removeItem('auth_token');
       localStorage.removeItem('auth_user');
