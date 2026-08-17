@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import api from '../services/api';
+import mockProperties from '../data/mockProperties';
 import type { Property, Room, Booking } from '../types';
 
 interface AuthUser {
@@ -99,7 +100,7 @@ export function BookingProvider({ children }: { children: ReactNode }) {
       }
       setProperties(props);
     } catch {
-      setProperties([]);
+      setProperties(mockProperties);
     } finally {
       setLoading(false);
     }

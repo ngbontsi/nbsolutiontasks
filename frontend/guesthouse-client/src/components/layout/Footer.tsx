@@ -1,3 +1,5 @@
+import { RASMENI_CONTACT } from '../../data/mockProperties';
+
 export default function Footer() {
   return (
     <footer className="footer">
@@ -5,25 +7,31 @@ export default function Footer() {
         <div className="footer-section">
           <h3>Rasmeni & Sons</h3>
           <p>
-            A curated collection of guesthouses across Cradock. From Lingelihle
-            to Town.
+            {RASMENI_CONTACT.address}
+          </p>
+          <p style={{ marginTop: '0.5rem', fontSize: '0.85rem', opacity: 0.8 }}>
+            Hours: {RASMENI_CONTACT.hours}<br />
+            After hours: {RASMENI_CONTACT.afterHours}
           </p>
         </div>
         <div className="footer-section">
           <h3>Contact</h3>
-          <p>📞 0800 STAY REST</p>
-          <p>✉️ rasmeni@gmail.com</p>
+          <p>WhatsApp Nikie: {RASMENI_CONTACT.whatsappNikie}</p>
+          <p>WhatsApp Alex: {RASMENI_CONTACT.whatsappAlex}</p>
+          <p>Landline: {RASMENI_CONTACT.landline}</p>
+          <p>{RASMENI_CONTACT.emailPrimary}</p>
         </div>
         <div className="footer-section">
-          <h3>Properties</h3>
-          <p>5 unique locations</p>
-          <p>50+ rooms available</p>
+          <h3>Quick Links</h3>
+          <p>Browse Rooms</p>
+          <p>My Bookings</p>
+          <p>Sign In to Book</p>
         </div>
       </div>
       <div className="footer-bottom">
         <p>
-          &copy; {new Date().getFullYear()} Rasmeni & Sons Guesthouse
-          Collection. All rights reserved.
+          &copy; {new Date().getFullYear()} Rasmeni & Sons Guesthouse.
+          All rights reserved.
         </p>
       </div>
     </footer>

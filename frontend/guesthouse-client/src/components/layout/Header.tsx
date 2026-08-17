@@ -13,7 +13,7 @@ export default function Header() {
         <Link to="/" className="brand">
           <span className="brand-icon">🏡</span>
           <div>
-            <div className="brand-name">SC Socio Economic Growth</div>
+            <div className="brand-name">Rasmeni & Sons</div>
             <div className="brand-tagline">Find your perfect getaway</div>
           </div>
         </Link>
