@@ -32,14 +32,6 @@ Thumbs.db
 # Kubernetes (secrets)
 devops/k8s/**-secret.yaml
 
-# Flutter
-frontend/task_app/build/
-frontend/task_app/.dart_tool/
-frontend/task_app/pubspec.lock
-frontend/task_app/.flutter-plugins
-frontend/task_app/.flutter-plugins-dependencies
-frontend/task_app/.metadata
-
 # Dashboard
 frontend/decoded_dashboard/node_modules/
 frontend/decoded_dashboard/dist/
@@ -56,12 +48,18 @@ frontend/guesthouse-client/dist/
 frontend/zozos-shop/node_modules/
 frontend/zozos-shop/dist/
 
+# Vuyolwethu
+frontend/vuyolwethu/node_modules/
+frontend/vuyolwethu/dist/
+
+# Portfolio
+frontend/portfolio/node_modules/
+frontend/portfolio/dist/
+frontend/portfolio/.idea/
+
+# Mobile - Decoded Tasks
+mobile/decoded-tasks/node_modules/
+mobile/decoded-tasks/dist/
+
 # TypeScript build info
 *.tsbuildinfo
-
-OFFLINE.md
-AGENTS.md
-
-
-# Decoded solution platform (nested)
-decoded solution platform/

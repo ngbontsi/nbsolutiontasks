@@ -28,8 +28,9 @@ const allNavItems = [
 const externalApps = [
   { href: "https://ngbontsi.github.io/decodedsolutions/butcher-shop/", label: "Butcher Shop", icon: ShoppingBag },
   { href: "https://ngbontsi.github.io/decodedsolutions/guesthouse-client/", label: "Guesthouse", icon: Hotel },
-  { href: "https://ngbontsi.github.io/zozos-kitchen/", label: "Zozo's Kitchen", icon: UtensilsCrossed },
-  { href: "https://ngbontsi.github.io/vuyolwethu/", label: "Vuyolwethu", icon: ExternalLink },
+  { href: "https://ngbontsi.github.io/decodedsolutions/zozos-shop/", label: "Zozo's Kitchen", icon: UtensilsCrossed },
+  { href: "https://ngbontsi.github.io/decodedsolutions/vuyolwethu/", label: "Vuyolwethu", icon: ExternalLink },
+  { href: "https://ngbontsi.github.io/decodedsolutions/freelance-work/", label: "Portfolio", icon: ExternalLink },
 ];
 
 export default function DashboardLayout() {
