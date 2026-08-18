@@ -1,17 +1,16 @@
 package com.platform.marketplace.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "orders")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +32,21 @@ public class Order {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj)return true;
+        if(obj == null || getClass() != obj.getClass())return false;
+
+        Order order = (Order) obj;
+
+        return id!=null&& Objects.equals(order.id,id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
     @PrePersist
     protected void onCreate() {

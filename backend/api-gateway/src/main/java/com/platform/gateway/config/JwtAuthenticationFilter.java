@@ -16,19 +16,36 @@ import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Date;
 import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     private static final List<String> PUBLIC_PATHS = List.of(
-            "/api/auth/login",
-            "/api/auth/register",
-            "/api/auth/refresh"
+            "/auth/login",
+            "/auth/register",
+            "/auth/refresh"
     );
+
+    private static final List<String> PUBLIC_GET_PREFIXES = List.of(
+            "/products",
+            "/categories",
+            "/guesthouses",
+            "/rooms"
+    );
+
+    private static final String LOGOUT_PATH = "/auth/logout";
 
     @Value("${jwt.secret}")
     private String jwtSecret;
+
+    private final TokenBlacklistService blacklistService;
+
+    public JwtAuthenticationFilter(TokenBlacklistService blacklistService) {
+        this.blacklistService = blacklistService;
+    }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -36,6 +53,10 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String path = request.getURI().getPath();
 
         if (isPublicPath(path)) {
+            return chain.filter(exchange);
+        }
+
+        if (isPublicGetPath(path, request.getMethod().name())) {
             return chain.filter(exchange);
         }
 
@@ -49,23 +70,51 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         try {
             Claims claims = validateToken(token);
-            String userId = claims.getSubject();
-            String role = (String) claims.get("role");
 
-            ServerHttpRequest modifiedRequest = request.mutate()
-                    .header("X-User-Id", userId)
-                    .header("X-User-Role", role != null ? role : "USER")
-                    .build();
+            if (path.equals(LOGOUT_PATH)) {
+                return handleLogout(token, claims, exchange);
+            }
 
-            return chain.filter(exchange.mutate().request(modifiedRequest).build());
+            return blacklistService.isBlacklisted(token)
+                    .flatMap(blacklisted -> {
+                        if (blacklisted) {
+                            return unauthorized(exchange.getResponse());
+                        }
+                        String userId = claims.getSubject();
+                        String role = (String) claims.get("role");
+                        String email = (String) claims.get("email");
+
+                        ServerHttpRequest modifiedRequest = request.mutate()
+                                .header("X-User-Id", userId)
+                                .header("X-User-Role", role != null ? role : "USER")
+                                .header("X-User-Email", email != null ? email : "")
+                                .build();
+
+                        return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                    });
 
         } catch (Exception e) {
             return unauthorized(exchange.getResponse());
         }
     }
 
+    private Mono<Void> handleLogout(String token, Claims claims, ServerWebExchange exchange) {
+        Date expiration = claims.getExpiration();
+        long ttlMillis = expiration.getTime() - System.currentTimeMillis();
+        if (ttlMillis <= 0) {
+            return ok(exchange.getResponse());
+        }
+        return blacklistService.blacklist(token, Duration.ofMillis(ttlMillis))
+                .then(ok(exchange.getResponse()));
+    }
+
     private boolean isPublicPath(String path) {
         return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
+    }
+
+    private boolean isPublicGetPath(String path, String method) {
+        if (!"GET".equalsIgnoreCase(method)) return false;
+        return PUBLIC_GET_PREFIXES.stream().anyMatch(path::startsWith);
     }
 
     private Claims validateToken(String token) {
@@ -82,8 +131,13 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         return response.setComplete();
     }
 
+    private Mono<Void> ok(ServerHttpResponse response) {
+        response.setStatusCode(HttpStatus.OK);
+        return response.setComplete();
+    }
+
     @Override
     public int getOrder() {
-        return -100;
+        return 100;
     }
 }

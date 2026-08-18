@@ -1,17 +1,16 @@
 package com.platform.marketplace.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "products")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -20,6 +19,9 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
+
+    @Column(nullable = false, name = "owner_id")
+    private String ownerId;
 
     @Column(nullable = false)
     private String name;
@@ -47,6 +49,15 @@ public class Product {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj)return true;
+        if(obj == null || getClass()!=obj.getClass())return false;
+        Product product = (Product) obj;
+
+        return id!=null&& Objects.equals(product.id,id);
+    }
 
     @PrePersist
     protected void onCreate() {

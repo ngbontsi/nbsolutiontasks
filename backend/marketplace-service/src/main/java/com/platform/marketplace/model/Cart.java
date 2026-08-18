@@ -1,16 +1,15 @@
 package com.platform.marketplace.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "carts")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -26,6 +25,19 @@ public class Cart {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    @Override
+    public boolean equals(Object obj) {
+        if(this == obj)return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+       Cart cart = (Cart) obj;
+        return id != null && Objects.equals(cart.id,id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
     @PrePersist
     protected void onCreate() {

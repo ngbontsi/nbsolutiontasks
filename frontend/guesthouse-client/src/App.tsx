@@ -6,6 +6,7 @@ import HomePage from './pages/HomePage';
 import PropertiesPage from './pages/PropertiesPage';
 import PropertyDetailPage from './pages/PropertyDetailPage';
 import MyBookingsPage from './pages/MyBookingsPage';
+import LoginPage from './pages/LoginPage';
 import './styles/app.css';
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/properties" element={<PropertiesPage />} />
           <Route path="/properties/:id" element={<PropertyDetailPage />} />
           <Route path="/my-bookings" element={<MyBookingsPage />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
         <Footer />
       </BookingProvider>

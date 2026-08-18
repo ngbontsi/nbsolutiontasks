@@ -1,6 +1,8 @@
 package com.platform.marketplace.service;
 
 import com.platform.marketplace.dto.ProductRequest;
+import com.platform.marketplace.dto.ProductResponse;
+import com.platform.marketplace.exception.ResourceNotFoundException;
 import com.platform.marketplace.model.Product;
 import com.platform.marketplace.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,63 +17,115 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    public Product create(ProductRequest request) {
+    public ProductResponse create(ProductRequest request, String ownerId) {
         Product product = Product.builder()
-                .name(request.getName())
-                .description(request.getDescription())
-                .price(BigDecimal.valueOf(request.getPrice()))
-                .stockQuantity(request.getStockQuantity())
-                .categoryId(request.getCategoryId())
-                .imageUrl(request.getImageUrl())
-                .brand(request.getBrand())
+                .ownerId(ownerId)
+                .name(request.name())
+                .description(request.description())
+                .price(BigDecimal.valueOf(request.price()))
+                .stockQuantity(request.stockQuantity())
+                .categoryId(request.categoryId())
+                .imageUrl(request.imageUrl())
+                .brand(request.brand())
                 .build();
-        return productRepository.save(product);
+        return toResponse(productRepository.save(product));
     }
 
-    public List<Product> getAll() {
-        return productRepository.findAll();
-    }
-
-    public List<Product> getActive() {
-        return productRepository.findByActiveTrue();
-    }
-
-    public List<Product> getByCategory(String categoryId) {
-        return productRepository.findByCategoryId(categoryId);
-    }
-
-    public List<Product> search(String query) {
-        return productRepository.findByNameContainingIgnoreCase(query);
-    }
-
-    public Product getById(String id) {
-        return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found"));
-    }
-
-    public Product update(String id, ProductRequest request) {
-        Product product = getById(id);
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        if (request.getPrice() != null) {
-            product.setPrice(BigDecimal.valueOf(request.getPrice()));
+    public List<ProductResponse> getAll(String userId, String userRole) {
+        if (isAdmin(userRole)) {
+            return productRepository.findAll().stream()
+                    .map(this::toResponse)
+                    .toList();
         }
-        product.setStockQuantity(request.getStockQuantity());
-        product.setCategoryId(request.getCategoryId());
-        product.setImageUrl(request.getImageUrl());
-        product.setBrand(request.getBrand());
-        return productRepository.save(product);
+        List<Product> products = (userId != null)
+                ? productRepository.findByOwnerId(userId)
+                : productRepository.findAll();
+        return products.stream()
+                .map(this::toResponse)
+                .toList();
     }
 
-    public void delete(String id) {
-        Product product = getById(id);
+    public List<ProductResponse> getActive(String userId, String userRole) {
+        if (isAdmin(userRole)) {
+            return productRepository.findByActiveTrue().stream()
+                    .map(this::toResponse)
+                    .toList();
+        }
+        List<Product> products = (userId != null)
+                ? productRepository.findByOwnerIdAndActiveTrue(userId)
+                : productRepository.findByActiveTrue();
+        return products.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public List<ProductResponse> getByCategory(String categoryId) {
+        return productRepository.findByCategoryId(categoryId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public List<ProductResponse> search(String query) {
+        return productRepository.findByNameContainingIgnoreCase(query).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    public ProductResponse getById(String id, String userId, String userRole) {
+        Product product = getByIdEntity(id);
+        if (!isAdmin(userRole) && userId != null && !userId.equals(product.getOwnerId())) {
+            throw new ResourceNotFoundException("Product not found");
+        }
+        return toResponse(product);
+    }
+
+    public ProductResponse update(String id, ProductRequest request, String userId, String userRole) {
+        Product product = getByIdEntity(id);
+        if (!isAdmin(userRole) && !userId.equals(product.getOwnerId())) {
+            throw new ResourceNotFoundException("Product not found");
+        }
+        product.setName(request.name());
+        product.setDescription(request.description());
+        if (request.price() != null) {
+            product.setPrice(BigDecimal.valueOf(request.price()));
+        }
+        product.setStockQuantity(request.stockQuantity());
+        product.setCategoryId(request.categoryId());
+        product.setImageUrl(request.imageUrl());
+        product.setBrand(request.brand());
+        return toResponse(productRepository.save(product));
+    }
+
+    public void delete(String id, String userId, String userRole) {
+        Product product = getByIdEntity(id);
+        if (!isAdmin(userRole) && !userId.equals(product.getOwnerId())) {
+            throw new ResourceNotFoundException("Product not found");
+        }
         product.setActive(false);
         productRepository.save(product);
     }
 
-    public void updateStock(String id, int quantity) {
-        Product product = getById(id);
+    void updateStock(String id, int quantity) {
+        Product product = getByIdEntity(id);
         product.setStockQuantity(product.getStockQuantity() - quantity);
         productRepository.save(product);
+    }
+
+    Product getByIdEntity(String id) {
+        return productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+    }
+
+    private boolean isAdmin(String userRole) {
+        return "ADMIN".equals(userRole);
+    }
+
+    private ProductResponse toResponse(Product p) {
+        return new ProductResponse(
+                p.getId(), p.getOwnerId(), p.getName(), p.getDescription(),
+                p.getPrice(), p.getStockQuantity(), p.getCategoryId(),
+                p.getImageUrl(), p.getBrand(), p.getRating(), p.getReviewCount(),
+                p.isActive(), p.getCreatedAt(), p.getUpdatedAt()
+        );
     }
 }

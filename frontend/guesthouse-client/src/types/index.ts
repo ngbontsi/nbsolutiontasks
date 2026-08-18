@@ -23,6 +23,7 @@ export interface Property {
 }
 
 export interface Booking {
+  id: string;
   propertyId: string;
   propertyName: string;
   roomId: string;

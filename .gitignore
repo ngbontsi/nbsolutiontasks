@@ -52,5 +52,16 @@ frontend/butcher-shop/dist/
 frontend/guesthouse-client/node_modules/
 frontend/guesthouse-client/dist/
 
+# Zozo's Shop
+frontend/zozos-shop/node_modules/
+frontend/zozos-shop/dist/
+
+# TypeScript build info
+*.tsbuildinfo
+
+OFFLINE.md
+AGENTS.md
+
+
 # Decoded solution platform (nested)
 decoded solution platform/

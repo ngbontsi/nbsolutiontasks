@@ -8,7 +8,7 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$DockerPassword,
 
-    [string]$Repo = "ngbontsi/task-api",
+    [string]$Repo,
     [string]$Domain = "ngbontsi.com"
 )
 

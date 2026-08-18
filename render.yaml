@@ -1,0 +1,91 @@
+# Render Blueprint — Decoded Platform (free tier)
+# Import: Render dashboard → New → Blueprint → repo ngbontsi/decodedsolutions → branch feature/cloud-setup-phase0
+# After import, set these in each service's dashboard (marked sync:false = not in the repo):
+#   - decoded-auth / decoded-api-gateway:  JWT_SECRET (same strong value on both)
+#   - decoded-auth / restaurant / guesthouse / marketplace:  DB_PASSWORD
+#   - decoded-api-gateway:  REDIS_HOST (internal hostname from the decoded-redis Key Value "Connect" tab)
+# Note: Render's Blueprint spec has no keyvalue resource — decoded-redis is created manually in the dashboard
+#   (New → Key Value → name "decoded-redis", plan free), then its internal hostname goes into REDIS_HOST above.
+
+databases: []
+
+services:
+  - type: web
+    name: decoded-auth
+    runtime: docker
+    rootDir: backend/auth-service
+    plan: free
+    autoDeploy: false
+    envVars:
+      - key: DATASOURCE_URL
+        value: jdbc:postgresql://ep-spring-violet-zaqo2m73.c-2.eu-west-2.aws.neon.tech/authdb?sslmode=require
+      - key: DB_USERNAME
+        value: neondb_owner
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+
+  - type: web
+    name: decoded-restaurant
+    runtime: docker
+    rootDir: backend/restaurant-service
+    plan: free
+    autoDeploy: false
+    envVars:
+      - key: DATASOURCE_URL
+        value: jdbc:postgresql://ep-spring-violet-zaqo2m73.c-2.eu-west-2.aws.neon.tech/restaurantdb?sslmode=require
+      - key: DB_USERNAME
+        value: neondb_owner
+      - key: DB_PASSWORD
+        sync: false
+
+  - type: web
+    name: decoded-guesthouse
+    runtime: docker
+    rootDir: backend/guesthouse-service
+    plan: free
+    autoDeploy: false
+    envVars:
+      - key: DATASOURCE_URL
+        value: jdbc:postgresql://ep-spring-violet-zaqo2m73.c-2.eu-west-2.aws.neon.tech/guesthousedb?sslmode=require
+      - key: DB_USERNAME
+        value: neondb_owner
+      - key: DB_PASSWORD
+        sync: false
+
+  - type: web
+    name: decoded-marketplace
+    runtime: docker
+    rootDir: backend/marketplace-service
+    plan: free
+    autoDeploy: false
+    envVars:
+      - key: DATASOURCE_URL
+        value: jdbc:postgresql://ep-spring-violet-zaqo2m73.c-2.eu-west-2.aws.neon.tech/marketplacedb?sslmode=require
+      - key: DB_USERNAME
+        value: neondb_owner
+      - key: DB_PASSWORD
+        sync: false
+
+  - type: web
+    name: decoded-api-gateway
+    runtime: docker
+    rootDir: backend/api-gateway
+    plan: free
+    autoDeploy: false
+    envVars:
+      - key: AUTH_SERVICE_URI
+        value: https://decoded-auth.onrender.com
+      - key: RESTAURANT_SERVICE_URI
+        value: https://decoded-restaurant.onrender.com
+      - key: GUESTHOUSE_SERVICE_URI
+        value: https://decoded-guesthouse.onrender.com
+      - key: MARKETPLACE_SERVICE_URI
+        value: https://decoded-marketplace.onrender.com
+      - key: REDIS_HOST
+        value: redis-REPLACE-WITH-KEY-VALUE-INTERNAL-HOST
+      - key: REDIS_PORT
+        value: "6379"
+      - key: JWT_SECRET
+        sync: false

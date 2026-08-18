@@ -3,6 +3,7 @@ package com.platform.marketplace.service;
 import com.platform.marketplace.dto.CartItemDetail;
 import com.platform.marketplace.dto.CartItemRequest;
 import com.platform.marketplace.dto.CartResponse;
+import com.platform.marketplace.exception.ResourceNotFoundException;
 import com.platform.marketplace.model.Cart;
 import com.platform.marketplace.model.CartItem;
 import com.platform.marketplace.model.Product;
@@ -31,7 +32,7 @@ public class CartService {
         BigDecimal total = BigDecimal.ZERO;
 
         for (CartItem item : items) {
-            Product product = productService.getById(item.getProductId());
+            Product product = productService.getByIdEntity(item.getProductId());
             BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
             
             itemDetails.add(CartItemDetail.builder()
@@ -53,26 +54,26 @@ public class CartService {
                 .build();
     }
 
-    public CartResponse addToCart(CartItemRequest request) {
-        Cart cart = getOrCreateCart(request.getUserId());
+    public CartResponse addToCart(CartItemRequest request, String userId) {
+        Cart cart = getOrCreateCart(userId);
         
         CartItem existingItem = cartItemRepository
-                .findByCartIdAndProductId(cart.getId(), request.getProductId())
+                .findByCartIdAndProductId(cart.getId(), request.productId())
                 .orElse(null);
 
         if (existingItem != null) {
-            existingItem.setQuantity(existingItem.getQuantity() + request.getQuantity());
+            existingItem.setQuantity(existingItem.getQuantity() + request.quantity());
             cartItemRepository.save(existingItem);
         } else {
             CartItem newItem = CartItem.builder()
                     .cartId(cart.getId())
-                    .productId(request.getProductId())
-                    .quantity(request.getQuantity())
+                    .productId(request.productId())
+                    .quantity(request.quantity())
                     .build();
             cartItemRepository.save(newItem);
         }
 
-        return getCart(request.getUserId());
+        return getCart(userId);
     }
 
     public CartResponse updateCartItem(String userId, String productId, int quantity) {
@@ -80,7 +81,7 @@ public class CartService {
         
         CartItem item = cartItemRepository
                 .findByCartIdAndProductId(cart.getId(), productId)
-                .orElseThrow(() -> new RuntimeException("Cart item not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart item not found"));
 
         if (quantity <= 0) {
             cartItemRepository.delete(item);
@@ -94,7 +95,7 @@ public class CartService {
 
     public void clearCart(String userId) {
         Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(() -> new RuntimeException("Cart not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart not found"));
         cartItemRepository.deleteByCartId(cart.getId());
     }
 

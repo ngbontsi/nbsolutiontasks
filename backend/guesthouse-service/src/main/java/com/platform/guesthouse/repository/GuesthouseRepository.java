@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface GuesthouseRepository extends JpaRepository<Guesthouse, String> {
     List<Guesthouse> findByActiveTrue();
+    List<Guesthouse> findByOwnerId(String ownerId);
+    List<Guesthouse> findByOwnerIdAndActiveTrue(String ownerId);
 }

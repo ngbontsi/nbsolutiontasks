@@ -2,7 +2,7 @@
 # Run this in PowerShell with GitHub CLI authenticated
 
 $ghPath = "C:\Program Files\GitHub CLI\gh.exe"
-$Repo = "ngbontsi/task-api"
+$Repo = ""  # Set your GitHub repo here
 
 Write-Host "Creating secrets for $Repo..." -ForegroundColor Cyan
 

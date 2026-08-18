@@ -3,7 +3,7 @@
 
 param(
     [string]$KubeconfigPath = "$env:USERPROFILE\.kube\docker-desktop-kubeconfig",
-    [string]$Repo = "ngbontsi/task-api"
+    [string]$Repo
 )
 
 $ghPath = "C:\Program Files\GitHub CLI\gh.exe"

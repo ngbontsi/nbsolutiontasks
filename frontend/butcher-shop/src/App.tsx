@@ -7,6 +7,7 @@ import ShopPage from './pages/ShopPage';
 import CartPage from './pages/CartPage';
 import WishlistPage from './pages/WishlistPage';
 import CheckoutPage from './pages/CheckoutPage';
+import LoginPage from './pages/LoginPage';
 import './styles/app.css';
 
 export default function App() {
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/cart" element={<CartPage />} />
           <Route path="/wishlist" element={<WishlistPage />} />
           <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/login" element={<LoginPage />} />
         </Routes>
         <Footer />
       </ShopProvider>

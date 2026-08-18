@@ -14,7 +14,7 @@ param(
     [Parameter(Mandatory=$true)]
     [string]$ProdKubeconfigPath,
 
-    [string]$Repo = "ngbontsi/task-api"
+    [string]$Repo
 )
 
 $ghPath = "C:\Program Files\GitHub CLI\gh.exe"

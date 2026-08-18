@@ -1,17 +1,16 @@
 package com.platform.restaurant.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 @Table(name = "menu_items")
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,6 +22,9 @@ public class MenuItem {
 
     @Column(nullable = false)
     private String restaurantId;
+
+    @Column(name = "owner_id")
+    private String ownerId;
 
     @Column(nullable = false)
     private String name;
@@ -38,6 +40,19 @@ public class MenuItem {
     private boolean available;
 
     private LocalDateTime createdAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MenuItem menuItem = (MenuItem) o;
+        return id != null && Objects.equals(id, menuItem.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 
     @PrePersist
     protected void onCreate() {
