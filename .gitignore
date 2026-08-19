@@ -63,3 +63,6 @@ mobile/decoded-tasks/dist/
 
 # TypeScript build info
 *.tsbuildinfo
+
+# Vite cache
+.vite/
