@@ -8,6 +8,53 @@
 - Client demos must remain standalone apps, not dashboard modules
 - Workflow: `develop` → `npm run build` → `.\deploy.ps1` (never commit dist/)
 
+## Branching Strategy (enforced via GitHub branch protection)
+Both `main` and `develop` require pull requests — no direct pushes allowed.
+
+### Branch hierarchy
+```
+main (production) ←── PR ←── develop (integration) ←── PR ←── feature/fix branches
+```
+
+### Branch types
+| Branch | Purpose | Branches from | Merges to |
+|--------|---------|---------------|-----------|
+| `main` | Production/live code only | — | — |
+| `develop` | Integration branch, all features land here | `main` | `main` via PR |
+| `feature/*` | New features | `develop` | `develop` via PR |
+| `fix/*` | Bug fixes | `develop` | `develop` via PR |
+| `hotfix/*` | Urgent production fixes | `main` | `main` + `develop` via PRs |
+
+### Workflow for new work
+```bash
+# 1. Start from latest develop
+git checkout develop
+git pull origin develop
+
+# 2. Create feature/fix branch
+git checkout -b feature/my-feature
+
+# 3. Work, commit, push
+git add .
+git commit -m "feat: description"
+git push origin feature/my-feature
+
+# 4. Create PR: feature/my-feature → develop
+# 5. After PR merges, delete the feature branch
+
+# 6. When ready to release to production:
+# Create PR: develop → main
+```
+
+### Commit message conventions
+- `feat:` — new feature
+- `fix:` — bug fix
+- `refactor:` — code change that neither fixes a bug nor adds a feature
+- `docs:` — documentation only
+- `chore:` — build, CI, or tooling changes
+- `style:` — formatting, no code change
+- `test:` — adding or correcting tests
+
 ## Progress
 ### Done
 - Added Swagger/OpenAPI annotations (`@Tag`, `@Operation`, `@ApiResponses`) to all 11 controllers across 4 services (auth: AuthController, AuditController, RoleController; restaurant: RestaurantController; guesthouse: GuesthouseController, RoomController, ReservationController; marketplace: ProductController, CartController, OrderController, CategoryController)
