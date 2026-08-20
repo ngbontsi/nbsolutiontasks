@@ -12,6 +12,9 @@ jobs:
       pull-requests: write
     steps:
       - name: Approve PR
-        run: gh pr review ${{ github.event.pull_request.number }} --approve
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/reviews" \
+            -d '{"event":"APPROVE"}'
